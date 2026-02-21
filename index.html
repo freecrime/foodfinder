@@ -31,8 +31,8 @@
   }
 
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{background:var(--bg);color:var(--text-primary);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+  html{scroll-behavior:smooth;height:100%}
+  body{background:var(--bg);color:var(--text-primary);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden;display:flex;flex-direction:column}
 
   #particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
 
@@ -48,7 +48,8 @@
   .btn-lang:hover{background:var(--surface-hover);border-color:var(--border-glow);box-shadow:var(--glow)}
 
   /* ── MAIN ── */
-  .main-container{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px 80px}
+  .main-container{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px 80px;flex:1}
+  .footer{position:relative;z-index:1;text-align:center;padding:30px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);letter-spacing:.5px;margin-top:auto}
 
   /* ── HERO ── */
   .hero{padding:60px 0 40px;text-align:center}
@@ -207,8 +208,6 @@
   .loading-dot:nth-child(3){animation-delay:.4s}
   @keyframes dot-bounce{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
 
-  .footer{position:relative;z-index:1;text-align:center;padding:30px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);letter-spacing:.5px}
-
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
   /* ── SCORE ── */
@@ -227,12 +226,50 @@
   .ai-parsed-note{font-size:11px;color:var(--text-muted);padding:8px 12px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:7px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
   .ing-uncertain{border-style:dashed;opacity:.7}
 
+  /* ── EDIT MODAL ── */
+  .edit-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);display:flex;align-items:flex-start;justify-content:center;padding:20px 16px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity var(--transition)}
+  .edit-overlay.open{opacity:1;pointer-events:all}
+  .edit-modal{background:#111;border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:680px;overflow:hidden;transform:translateY(20px) scale(.98);transition:transform var(--transition);margin:auto}
+  .edit-overlay.open .edit-modal{transform:translateY(0) scale(1)}
+  .edit-modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .edit-modal-title{font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:-.5px}
+  .edit-modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:18px;max-height:68vh;overflow-y:auto}
+  .edit-field-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px;display:block}
+  .edit-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:var(--font-body);font-size:14px;padding:10px 14px;width:100%;outline:none;transition:var(--transition)}
+  .edit-input:focus{border-color:var(--border-glow);background:var(--surface-hover)}
+  .edit-ing-list{display:flex;flex-direction:column;gap:6px}
+  .edit-ing-row{display:flex;gap:8px;align-items:center}
+  .edit-ing-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;padding:8px 12px;outline:none;transition:var(--transition)}
+  .edit-ing-input:focus{border-color:var(--border-glow)}
+  .btn-remove-row{background:transparent;border:1px solid var(--border);color:var(--text-muted);width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;transition:var(--transition);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .btn-remove-row:hover{color:#ff6b6b;border-color:rgba(255,100,100,.3);background:rgba(255,100,100,.06)}
+  .btn-add-row{background:transparent;border:1px dashed rgba(255,255,255,.15);color:var(--text-muted);font-family:var(--font-body);font-size:12px;padding:7px 14px;border-radius:7px;cursor:pointer;transition:var(--transition);width:100%;text-align:center;margin-top:4px}
+  .btn-add-row:hover{border-color:var(--border-glow);color:var(--text-primary)}
+  .edit-step-list{display:flex;flex-direction:column;gap:8px}
+  .edit-step-row{display:flex;gap:8px;align-items:flex-start}
+  .edit-step-num{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--surface-active);border:1px solid var(--border);font-size:11px;font-weight:700;font-family:var(--font-display);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);margin-top:6px}
+  .edit-step-ta{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;padding:8px 12px;outline:none;transition:var(--transition);resize:vertical;min-height:56px;line-height:1.6}
+  .edit-step-ta:focus{border-color:var(--border-glow)}
+  .edit-modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .btn-edit-save{background:var(--text-primary);color:var(--bg);border:none;border-radius:8px;font-family:var(--font-display);font-size:13px;font-weight:700;padding:10px 22px;cursor:pointer;transition:var(--transition)}
+  .btn-edit-save:hover{background:#e0e0e0}
+  .btn-edit-cancel{background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font-body);font-size:13px;padding:10px 18px;border-radius:8px;cursor:pointer;transition:var(--transition)}
+  .btn-edit-cancel:hover{color:var(--text-primary);border-color:var(--border-glow)}
+  .btn-tiny.edit-btn:hover{color:#7eb8ff;border-color:rgba(100,160,255,.35)}
+  #local-section{display:none}
+
   @media(max-width:700px){
     .navbar{padding:0 12px;height:56px}
     .nav-logo{font-size:17px}
     .nav-right{gap:5px}
     .btn-nav{padding:5px 8px;font-size:11px}
     .btn-lang{padding:5px 10px;font-size:11px}
+  }
+  @media(max-width:600px){
+    .edit-modal-header,.edit-modal-body,.edit-modal-footer{padding-left:14px;padding-right:14px}
+    .edit-modal-body{max-height:62vh}
+    .edit-modal-footer{flex-direction:column}
+    .btn-edit-save,.btn-edit-cancel{width:100%;text-align:center}
   }
   @media(max-width:600px){
     .hero{padding:40px 0 28px}
@@ -266,6 +303,7 @@
   <div class="nav-logo">Food<span>Finder</span></div>
   <div class="nav-right">
     <button class="btn-nav" id="btn-toggle-upload" data-i18n="nav.upload">Add Recipe</button>
+    <button class="btn-nav" id="btn-show-local" data-i18n="nav.local">My Recipes</button>
     <button class="btn-nav" id="btn-show-favs" data-i18n="nav.favorites">Favorites</button>
     <button class="btn-lang" id="btn-lang">DE</button>
   </div>
@@ -364,6 +402,33 @@
     <div class="results-grid" id="favorites-grid"></div>
   </div>
 
+  <!-- LOCAL RECIPES SECTION -->
+  <div id="local-section">
+    <div class="section-divider"></div>
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="local.sectionTitle">My Local Recipes</h2>
+      <button class="btn-secondary" id="btn-close-local-section" data-i18n="local.hide">Hide</button>
+    </div>
+    <div class="local-recipes-list" id="local-section-list"></div>
+  </div>
+
+</div>
+
+<!-- EDIT RECIPE MODAL -->
+<div class="edit-overlay" id="edit-overlay">
+  <div class="edit-modal">
+    <div class="edit-modal-header">
+      <span class="edit-modal-title">Edit Recipe</span>
+      <button class="btn-edit-cancel" id="btn-edit-close" style="padding:6px 12px;font-size:12px">✕</button>
+    </div>
+    <div class="edit-modal-body" id="edit-modal-body">
+      <!-- filled by JS -->
+    </div>
+    <div class="edit-modal-footer">
+      <button class="btn-edit-cancel" id="btn-edit-cancel">Cancel</button>
+      <button class="btn-edit-save" id="btn-edit-save">Save Changes</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -500,7 +565,8 @@ const LANG = {
     'upload.dropSub':'or click to browse \u2014 supports multiple files \u2014 stored locally in browser',
     'upload.processing':'Parsing PDF...','upload.done':'Recipe added!','upload.error':'Could not parse PDF.',
     'upload.noLocal':'No local recipes added yet.','upload.view':'View','upload.delete':'Delete',
-    'local.badge':'LOCAL',
+    'local.badge':'LOCAL','nav.local':'My Recipes',
+    'local.sectionTitle':'My Local Recipes','local.hide':'Hide',
     'modal.translate':'🌐 Translate to English','modal.translateDe':'🌐 Translate to German','modal.translating':'Translating...','modal.translated':'✓ Translated',
   },
   de: {
@@ -528,7 +594,8 @@ const LANG = {
     'upload.dropSub':'oder klicken zum Ausw\u00e4hlen \u2014 mehrere Dateien m\u00f6glich \u2014 lokal gespeichert',
     'upload.processing':'PDF wird verarbeitet...','upload.done':'Rezept hinzugef\u00fcgt!','upload.error':'PDF konnte nicht gelesen werden.',
     'upload.noLocal':'Noch keine lokalen Rezepte.','upload.view':'Ansehen','upload.delete':'L\u00f6schen',
-    'local.badge':'LOKAL',
+    'local.badge':'LOKAL','nav.local':'Meine Rezepte',
+    'local.sectionTitle':'Meine lokalen Rezepte','local.hide':'Verbergen',
     'modal.translate':'🌐 Ins Englische \u00fcbersetzen','modal.translateDe':'🌐 Ins Deutsche \u00fcbersetzen','modal.translating':'Wird \u00fcbersetzt...','modal.translated':'\u2713 \u00dcbersetzt',
   }
 };
@@ -1690,35 +1757,43 @@ function saveLocalRecipes() {
 }
 
 function renderLocalRecipesList() {
-  const container = document.getElementById('local-recipes-list');
-  if (!state.localRecipes.length) {
-    container.innerHTML = `<p style="font-size:13px;color:var(--text-muted);padding:10px 0">${t('upload.noLocal')}</p>`;
-    return;
-  }
-  container.innerHTML = state.localRecipes.map(r => {
-    const ingCount = (r.ingredients||[]).length;
-    const stepCount = r.instructions ? r.instructions.split('\n').filter(s=>s.trim().length>5).length : 0;
-    const meta = [
-      r.filename,
-      ingCount + ' ingredient' + (ingCount !== 1 ? 's' : ''),
-      stepCount + ' step' + (stepCount !== 1 ? 's' : ''),
-      r.time ? r.time + ' min' : null,
-      r.category || null,
-    ].filter(Boolean).join(' &mdash; ');
-    return `
-    <div class="local-recipe-row" data-id="${r.id}">
-      <div class="local-recipe-info">
-        <div class="local-recipe-name">${r.title}</div>
-        <div class="local-recipe-meta">${meta}</div>
-      </div>
-      <div class="local-recipe-actions">
-        <button class="btn-tiny view-local" data-id="${r.id}">${t('upload.view')}</button>
-        <button class="btn-tiny danger delete-local" data-id="${r.id}">${t('upload.delete')}</button>
-      </div>
-    </div>`;
-  }).join('');
-  container.querySelectorAll('.view-local').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.id)));
-  container.querySelectorAll('.delete-local').forEach(btn => btn.addEventListener('click', () => deleteLocalRecipe(btn.dataset.id)));
+  // Render both the upload panel list and the standalone local section list
+  ['local-recipes-list', 'local-section-list'].forEach(containerId => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (!state.localRecipes.length) {
+      container.innerHTML = `<p style="font-size:13px;color:var(--text-muted);padding:10px 0">${t('upload.noLocal')}</p>`;
+      return;
+    }
+    container.innerHTML = state.localRecipes.map(r => {
+      const ingCount = (r.ingredients||[]).length;
+      const stepCount = r.instructions ? r.instructions.split('\n').filter(s=>s.trim().length>5).length : 0;
+      const score = state.scores[String(r.id)];
+      const scorePill = score !== undefined ? `<span style="background:var(--surface-active);border:1px solid var(--border);border-radius:4px;font-size:10px;font-weight:700;padding:1px 6px;color:var(--text-secondary);margin-left:6px">${score}/100</span>` : '';
+      const meta = [
+        r.filename,
+        ingCount + ' ingredient' + (ingCount !== 1 ? 's' : ''),
+        stepCount + ' step' + (stepCount !== 1 ? 's' : ''),
+        r.time ? r.time + ' min' : null,
+        r.category || null,
+      ].filter(Boolean).join(' &mdash; ');
+      return `
+      <div class="local-recipe-row" data-id="${r.id}">
+        <div class="local-recipe-info">
+          <div class="local-recipe-name">${r.title}${scorePill}</div>
+          <div class="local-recipe-meta">${meta}</div>
+        </div>
+        <div class="local-recipe-actions">
+          <button class="btn-tiny view-local" data-id="${r.id}">${t('upload.view')}</button>
+          <button class="btn-tiny edit-btn edit-local" data-id="${r.id}" title="Edit recipe">✏</button>
+          <button class="btn-tiny danger delete-local" data-id="${r.id}">${t('upload.delete')}</button>
+        </div>
+      </div>`;
+    }).join('');
+    container.querySelectorAll('.view-local').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.id)));
+    container.querySelectorAll('.edit-local').forEach(btn => btn.addEventListener('click', () => openEditModal(btn.dataset.id)));
+    container.querySelectorAll('.delete-local').forEach(btn => btn.addEventListener('click', () => deleteLocalRecipe(btn.dataset.id)));
+  });
 }
 
 function deleteLocalRecipe(id) {
@@ -1728,6 +1803,140 @@ function deleteLocalRecipe(id) {
   saveLocalRecipes();
   renderLocalRecipesList();
   renderFavorites();
+}
+
+// ============================================================
+//  EDIT RECIPE MODAL
+// ============================================================
+let _editingId = null;
+
+function openEditModal(id) {
+  const recipe = state.localRecipes.find(r => r.id === id);
+  if (!recipe) return;
+  _editingId = id;
+
+  const ingredients = (recipe.ingredients || []).map(i => i.text);
+  const steps = (recipe.instructions || '').split('\n').filter(s => s.trim().length > 0);
+
+  document.getElementById('edit-modal-body').innerHTML = `
+    <div>
+      <label class="edit-field-label">Recipe Name</label>
+      <input class="edit-input" id="edit-title" type="text" value="${escHtml(recipe.title)}">
+    </div>
+    <div>
+      <label class="edit-field-label">Ingredients</label>
+      <div class="edit-ing-list" id="edit-ing-list">
+        ${ingredients.map((ing, i) => editIngRow(ing, i)).join('')}
+      </div>
+      <button class="btn-add-row" id="btn-add-ing">+ Add ingredient</button>
+    </div>
+    <div>
+      <label class="edit-field-label">Steps</label>
+      <div class="edit-step-list" id="edit-step-list">
+        ${steps.map((s, i) => editStepRow(s, i)).join('')}
+      </div>
+      <button class="btn-add-row" id="btn-add-step">+ Add step</button>
+    </div>
+  `;
+
+  bindEditListeners();
+  document.getElementById('edit-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function editIngRow(value, idx) {
+  return `<div class="edit-ing-row" data-idx="${idx}">
+    <input class="edit-ing-input" type="text" value="${escHtml(value)}" placeholder="e.g. 200g flour">
+    <button class="btn-remove-row" title="Remove">✕</button>
+  </div>`;
+}
+
+function editStepRow(value, idx) {
+  return `<div class="edit-step-row" data-idx="${idx}">
+    <span class="edit-step-num">${idx+1}</span>
+    <textarea class="edit-step-ta" rows="2" placeholder="Describe this step...">${escHtml(value)}</textarea>
+    <button class="btn-remove-row" title="Remove">✕</button>
+  </div>`;
+}
+
+function bindEditListeners() {
+  // Remove ingredient rows
+  document.getElementById('edit-ing-list').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-remove-row');
+    if (btn) btn.closest('.edit-ing-row').remove();
+  });
+  // Remove step rows
+  document.getElementById('edit-step-list').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-remove-row');
+    if (btn) { btn.closest('.edit-step-row').remove(); renumberSteps(); }
+  });
+  // Add ingredient
+  document.getElementById('btn-add-ing').addEventListener('click', () => {
+    const list = document.getElementById('edit-ing-list');
+    const div = document.createElement('div');
+    div.className = 'edit-ing-row';
+    div.innerHTML = editIngRow('', list.children.length);
+    list.appendChild(div);
+    div.querySelector('input').focus();
+  });
+  // Add step
+  document.getElementById('btn-add-step').addEventListener('click', () => {
+    const list = document.getElementById('edit-step-list');
+    const div = document.createElement('div');
+    div.className = 'edit-step-row';
+    div.innerHTML = `<span class="edit-step-num">${list.children.length + 1}</span>
+      <textarea class="edit-step-ta" rows="2" placeholder="Describe this step..."></textarea>
+      <button class="btn-remove-row" title="Remove">✕</button>`;
+    list.appendChild(div);
+    div.querySelector('textarea').focus();
+  });
+}
+
+function renumberSteps() {
+  document.querySelectorAll('#edit-step-list .edit-step-num').forEach((el, i) => el.textContent = i + 1);
+}
+
+function closeEditModal() {
+  document.getElementById('edit-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  _editingId = null;
+}
+
+function saveEditedRecipe() {
+  if (!_editingId) return;
+  const idx = state.localRecipes.findIndex(r => r.id === _editingId);
+  if (idx === -1) return;
+
+  const title = document.getElementById('edit-title').value.trim() || state.localRecipes[idx].title;
+  const ingredients = [...document.querySelectorAll('#edit-ing-list .edit-ing-input')]
+    .map(inp => inp.value.trim()).filter(Boolean).map(t => ({ text: t }));
+  const steps = [...document.querySelectorAll('#edit-step-list .edit-step-ta')]
+    .map(ta => ta.value.trim()).filter(Boolean);
+
+  state.localRecipes[idx] = {
+    ...state.localRecipes[idx],
+    title,
+    ingredients,
+    instructions: steps.join('\n'),
+    _stats: { ingCount: ingredients.length, stepCount: steps.length },
+    _editedAt: Date.now(),
+  };
+
+  // Also update in favorites if saved there
+  const favIdx = state.favorites.findIndex(f => f.id === _editingId);
+  if (favIdx > -1) {
+    state.favorites[favIdx] = { ...state.favorites[favIdx], title, ingredients, instructions: steps.join('\n') };
+    localStorage.setItem('ff-favorites', JSON.stringify(state.favorites));
+  }
+
+  saveLocalRecipes();
+  renderLocalRecipesList();
+  renderFavorites();
+  closeEditModal();
 }
 
 // ============================================================
@@ -1855,6 +2064,19 @@ document.getElementById('btn-show-favs').addEventListener('click',()=>{
   if(state.favorites.length) setTimeout(()=>section.scrollIntoView({behavior:'smooth',block:'start'}),50);
 });
 
+document.getElementById('btn-show-local').addEventListener('click',()=>{
+  const section=document.getElementById('local-section');
+  const isVisible = section.style.display !== 'none' && section.style.display !== '';
+  if(isVisible){ section.style.display='none'; return; }
+  section.style.display='block';
+  renderLocalRecipesList();
+  setTimeout(()=>section.scrollIntoView({behavior:'smooth',block:'start'}),50);
+});
+
+document.getElementById('btn-close-local-section').addEventListener('click',()=>{
+  document.getElementById('local-section').style.display='none';
+});
+
 // Upload panel toggle
 document.getElementById('btn-toggle-upload').addEventListener('click',()=>{
   const panel=document.getElementById('upload-panel');
@@ -1889,7 +2111,13 @@ document.querySelectorAll('.sort-btn').forEach(btn=>btn.addEventListener('click'
 document.getElementById('btn-close-modal').addEventListener('click',closeModal);
 document.getElementById('btn-translate-modal').addEventListener('click',handleTranslateClick);
 document.getElementById('modal-overlay').addEventListener('click',e=>{ if(e.target===document.getElementById('modal-overlay')) closeModal(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeEditModal(); } });
+
+// Edit modal
+document.getElementById('btn-edit-close').addEventListener('click', closeEditModal);
+document.getElementById('btn-edit-cancel').addEventListener('click', closeEditModal);
+document.getElementById('btn-edit-save').addEventListener('click', saveEditedRecipe);
+document.getElementById('edit-overlay').addEventListener('click', e=>{ if(e.target===document.getElementById('edit-overlay')) closeEditModal(); });
 
 document.getElementById('btn-save-modal').addEventListener('click',()=>{ if(state.currentRecipe) toggleFavorite(state.currentRecipe.id); });
 
