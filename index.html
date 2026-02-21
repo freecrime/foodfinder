@@ -161,6 +161,12 @@
   .translate-notice{font-size:11px;color:var(--text-muted);padding:10px 28px;border-top:1px solid var(--border);background:rgba(255,255,255,.01);display:none}
   .translate-notice.visible{display:block}
   .modal-loading{padding:40px 28px;text-align:center;color:var(--text-muted);font-size:13px}
+  .btn-translate{background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font-body);font-size:12px;padding:8px 16px;border-radius:7px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:6px}
+  .btn-translate:hover{color:var(--text-primary);border-color:var(--border-glow);background:var(--surface-hover)}
+  .btn-translate:disabled{opacity:.45;cursor:default}
+  .translate-spinner{display:none;width:12px;height:12px;border:2px solid rgba(255,255,255,.15);border-top-color:rgba(255,255,255,.7);border-radius:50%;animation:spin .7s linear infinite}
+  .btn-translate.translating .translate-spinner{display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
   /* ── SECTION / FAVS ── */
   .section-divider{height:1px;background:var(--border);margin:50px 0 40px}
@@ -344,7 +350,13 @@
     <div class="translate-notice" id="translate-notice" data-i18n="modal.translatedNotice">Content automatically translated to German.</div>
     <div class="modal-footer">
       <button class="btn-close-modal" id="btn-close-modal" data-i18n="modal.close">Close</button>
-      <button class="btn-save-recipe" id="btn-save-modal" data-i18n="modal.save">Save to Favorites</button>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn-translate" id="btn-translate-modal" style="display:none">
+          <span class="translate-spinner"></span>
+          <span id="btn-translate-label">🌐 Translate</span>
+        </button>
+        <button class="btn-save-recipe" id="btn-save-modal" data-i18n="modal.save">Save to Favorites</button>
+      </div>
     </div>
   </div>
 </div>
@@ -452,6 +464,7 @@ const LANG = {
     'upload.processing':'Parsing PDF...','upload.done':'Recipe added!','upload.error':'Could not parse PDF.',
     'upload.noLocal':'No local recipes added yet.','upload.view':'View','upload.delete':'Delete',
     'local.badge':'LOCAL',
+    'modal.translate':'🌐 Translate to English','modal.translateDe':'🌐 Translate to German','modal.translating':'Translating...','modal.translated':'✓ Translated',
   },
   de: {
     'nav.favorites':'Favoriten','nav.upload':'Rezept hinzuf\u00fcgen',
@@ -479,6 +492,7 @@ const LANG = {
     'upload.processing':'PDF wird verarbeitet...','upload.done':'Rezept hinzugef\u00fcgt!','upload.error':'PDF konnte nicht gelesen werden.',
     'upload.noLocal':'Noch keine lokalen Rezepte.','upload.view':'Ansehen','upload.delete':'L\u00f6schen',
     'local.badge':'LOKAL',
+    'modal.translate':'🌐 Ins Englische \u00fcbersetzen','modal.translateDe':'🌐 Ins Deutsche \u00fcbersetzen','modal.translating':'Wird \u00fcbersetzt...','modal.translated':'\u2713 \u00dcbersetzt',
   }
 };
 
@@ -717,7 +731,9 @@ function buildCard(recipe, isFav=false) {
   const tags = (recipe.tags||[]).slice(0,2).map(tag=>`<span class="tag">${tag}</span>`).join('');
   const imgEl = recipe.image
     ? `<img class="card-img" src="${recipe.image}" alt="${recipe.title}" loading="lazy" onerror="this.style.display='none'">`
-    : `<div class="card-placeholder">${recipe.title.charAt(0)}</div>`;
+    : recipe.pdfImageDataUrl
+      ? `<img class="card-img" src="${recipe.pdfImageDataUrl}" alt="${recipe.title}" loading="lazy" style="object-position:top">`
+      : `<div class="card-placeholder">${recipe.title.charAt(0)}</div>`;
   const localBadge = recipe.isLocal ? `<span class="local-badge">${t('local.badge')}</span>` : '';
   return `
   <article class="recipe-card${recipe.isLocal?' local-card':''}" data-id="${recipe.id}" tabindex="0" role="button" aria-label="${recipe.title}">
@@ -751,19 +767,32 @@ function setStateMsg(titleKey, subKey, targetId='results-grid') {
 }
 
 // ============================================================
-//  MODAL
+//  MODAL — with translate button + PDF image support
 // ============================================================
+
+let _modalTranslated = false;
+let _modalOriginalIngredients = null;
+let _modalOriginalInstructions = null;
+
 async function openModal(id) {
   const allRecipes = [...state.recipes, ...state.favorites, ...state.localRecipes];
   const recipe = allRecipes.find(r=>String(r.id)===String(id));
   if (!recipe) return;
   state.currentRecipe = recipe;
 
-  // Image
+  _modalTranslated = false;
+  _modalOriginalIngredients = null;
+  _modalOriginalInstructions = null;
+
+  // Image: prefer stored image, then PDF canvas image, then placeholder
   const imgWrap = document.getElementById('modal-img-wrap');
-  imgWrap.innerHTML = recipe.image
-    ? `<img class="modal-img" src="${recipe.image}" alt="${recipe.title}" onerror="this.style.display='none'">`
-    : `<div class="modal-img-placeholder">${recipe.title.charAt(0)}</div>`;
+  if (recipe.image) {
+    imgWrap.innerHTML = `<img class="modal-img" src="${recipe.image}" alt="${recipe.title}" onerror="this.style.display='none'">`;
+  } else if (recipe.pdfImageDataUrl) {
+    imgWrap.innerHTML = `<img class="modal-img" src="${recipe.pdfImageDataUrl}" alt="${recipe.title}" style="object-position:top">`;
+  } else {
+    imgWrap.innerHTML = `<div class="modal-img-placeholder">${recipe.title.charAt(0)}</div>`;
+  }
 
   document.getElementById('modal-title').textContent = recipe.title;
   document.getElementById('modal-body').innerHTML=`<div class="modal-loading"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></div>`;
@@ -773,6 +802,16 @@ async function openModal(id) {
   const saveBtn = document.getElementById('btn-save-modal');
   saveBtn.textContent = isSaved ? t('modal.saved') : t('modal.save');
   saveBtn.className = 'btn-save-recipe'+(isSaved?' saved':'');
+
+  // Show translate button for API recipes (likely English) or local German recipes
+  const translateBtn = document.getElementById('btn-translate-modal');
+  const translateLabel = document.getElementById('btn-translate-label');
+  const isLikelyGerman = recipe.isLocal || recipe.source === 'local';
+  const isLikelyEnglish = !recipe.isLocal;
+  translateBtn.style.display = 'flex';
+  translateBtn.disabled = false;
+  translateBtn.classList.remove('translating');
+  translateLabel.textContent = isLikelyGerman ? t('modal.translate') : t('modal.translateDe');
 
   let metaHTML='';
   if(recipe.time) metaHTML+=`<div class="modal-meta-item"><span>${t('meta.time')}</span><strong>${recipe.time} min</strong></div>`;
@@ -786,17 +825,14 @@ async function openModal(id) {
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
 
-  let instructions = recipe.instructions||'';
-  const shouldTranslate = state.lang==='de' && CONFIG.TRANSLATE_API!=='none';
-  if(shouldTranslate && instructions) {
-    try { instructions = await translateText(instructions,'de'); document.getElementById('translate-notice').classList.add('visible'); }
-    catch(e){}
-  }
+  renderModalContent(recipe.ingredients||[], recipe.instructions||'', false);
+}
 
+function renderModalContent(ingredients, instructions, translated) {
   let bodyHTML='';
-  if(recipe.ingredients&&recipe.ingredients.length) {
+  if(ingredients&&ingredients.length) {
     bodyHTML+=`<p class="modal-section-title">${t('modal.ingredients')}</p>
-    <div class="ingredients-list">${recipe.ingredients.map(i=>`<div class="ingredient-item">${i.text}</div>`).join('')}</div>`;
+    <div class="ingredients-list">${ingredients.map(i=>`<div class="ingredient-item">${i.text}</div>`).join('')}</div>`;
   }
   if(instructions) {
     const rawSteps = instructions.split(/\r?\n+/).map(s=>s.replace(/^\d+[\.\)]\s*/,'').trim()).filter(s=>s.length>8);
@@ -805,7 +841,93 @@ async function openModal(id) {
     <div class="instructions-list">${steps.map((s,i)=>`<div class="instruction-step"><span class="step-num">${i+1}</span><span class="step-text">${s}</span></div>`).join('')}</div>`;
   }
   if(!bodyHTML) bodyHTML=`<p style="color:var(--text-muted);font-size:13px;padding:10px 0">${t('state.noResultsSub')}</p>`;
+  if(translated) {
+    bodyHTML += `<p style="font-size:11px;color:var(--text-muted);margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">🌐 Automatically translated</p>`;
+  }
   document.getElementById('modal-body').innerHTML=bodyHTML;
+}
+
+async function handleTranslateClick() {
+  const recipe = state.currentRecipe;
+  if (!recipe) return;
+  const btn = document.getElementById('btn-translate-modal');
+  const label = document.getElementById('btn-translate-label');
+
+  // If already translated, revert
+  if (_modalTranslated) {
+    _modalTranslated = false;
+    renderModalContent(_modalOriginalIngredients, _modalOriginalInstructions, false);
+    const isLikelyGerman = recipe.isLocal || recipe.source === 'local';
+    label.textContent = isLikelyGerman ? t('modal.translate') : t('modal.translateDe');
+    return;
+  }
+
+  _modalOriginalIngredients = recipe.ingredients || [];
+  _modalOriginalInstructions = recipe.instructions || '';
+
+  btn.disabled = true;
+  btn.classList.add('translating');
+  label.textContent = t('modal.translating');
+
+  const isLikelyGerman = recipe.isLocal || recipe.source === 'local';
+  const targetLang = isLikelyGerman ? 'English' : 'German';
+  const sourceLang = isLikelyGerman ? 'German' : 'English';
+
+  try {
+    const ingText = _modalOriginalIngredients.map(i=>i.text).join('\n');
+    const instrText = _modalOriginalInstructions;
+
+    const prompt = `Translate this recipe from ${sourceLang} to ${targetLang}. Return ONLY in this exact format with the section headers:
+
+INGREDIENTS:
+[translated ingredients, one per line]
+
+INSTRUCTIONS:
+[translated instructions]
+
+INGREDIENTS TO TRANSLATE:
+${ingText}
+
+INSTRUCTIONS TO TRANSLATE:
+${instrText}`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    const translated = data.content.map(c=>c.text||'').join('');
+
+    const ingMatch = translated.match(/INGREDIENTS:\s*([\s\S]+?)(?=\n\nINSTRUCTIONS:|$)/i);
+    const instMatch = translated.match(/INSTRUCTIONS:\s*([\s\S]+?)$/i);
+
+    const translatedIngredients = ingMatch
+      ? ingMatch[1].trim().split('\n').filter(Boolean).map(l=>({text:l.replace(/^[-•*]\s*/,'').trim()})).filter(l=>l.text)
+      : _modalOriginalIngredients;
+    const translatedInstructions = instMatch ? instMatch[1].trim() : _modalOriginalInstructions;
+
+    _modalTranslated = true;
+    renderModalContent(translatedIngredients, translatedInstructions, true);
+    label.textContent = '↩ ' + (targetLang === 'English' ? 'Show original (DE)' : 'Original anzeigen (EN)');
+
+  } catch (e) {
+    console.error('Translation failed:', e);
+    label.textContent = '⚠ Translation unavailable';
+  }
+
+  btn.disabled = false;
+  btn.classList.remove('translating');
 }
 
 function closeModal() {
@@ -859,7 +981,7 @@ async function extractStructuredLines(arrayBuffer) {
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
   const allLines = []; // [{text, fontSize, bold, x, y, pageY}]
   let pageOffsetY = 0;
 
@@ -987,19 +1109,47 @@ function scoreIngredientLine(line, fontSize, bold, avgBodyFontSize) {
 }
 
 // ---- Step 5: Main recipe parser ----
+// ---- Chefkoch-style layout detector ----
+// Chefkoch PDFs have a two-column layout where:
+//   LEFT column  = cooking instructions (prose paragraphs)
+//   RIGHT column = ingredient list (with amounts)
+// This function detects and separates them.
+
+function detectColumnLayout(lines) {
+  if (!lines.length) return { isChefkoch: false };
+
+  // Find the X midpoint of the page
+  const allX = lines.map(l => l.x).filter(x => x > 0);
+  if (!allX.length) return { isChefkoch: false };
+  const pageWidth = Math.max(...allX) + 100;
+  const midX = pageWidth * 0.45; // ~45% for Chefkoch layout
+
+  // Check if there's a "Zutaten" header on the right side
+  const zutatenLine = lines.find(l =>
+    /zutaten\s*(f[üu]r|for)?\s*(\d+)?\s*(portion|serving)?/i.test(l.text) && l.x > midX
+  );
+
+  // Check if substantial text exists in both columns
+  const leftLines = lines.filter(l => l.x <= midX);
+  const rightLines = lines.filter(l => l.x > midX);
+
+  const isChefkoch = !!zutatenLine && leftLines.length > 3 && rightLines.length > 3;
+
+  return { isChefkoch, midX, zutatenLine };
+}
+
 function parseRecipeFromLines(lines, filename) {
   if (!lines.length) return null;
 
-  // Compute average body font size (mode of font sizes, excluding very large)
+  // Compute average body font size
   const fontSizes = lines.map(l => Math.round(l.fontSize)).filter(s => s > 6 && s < 30);
   const fsFreq = {};
   fontSizes.forEach(s => fsFreq[s] = (fsFreq[s] || 0) + 1);
   const avgBodyFontSize = +Object.entries(fsFreq).sort((a,b) => b[1]-a[1])[0]?.[0] || 11;
 
-  // ---- Find title: largest/boldest line near the top, or first meaningful line ----
+  // ---- Find title ----
   let titleLine = null;
-  const topLines = lines.slice(0, Math.min(12, lines.length));
-  // Prefer bold or large font
+  const topLines = lines.slice(0, Math.min(15, lines.length));
   const boldLarge = topLines.filter(l => (l.bold || l.fontSize > avgBodyFontSize * 1.3) && l.text.length > 2 && l.text.length < 120);
   if (boldLarge.length) {
     titleLine = boldLarge.sort((a,b) => b.fontSize - a.fontSize)[0];
@@ -1010,201 +1160,197 @@ function parseRecipeFromLines(lines, filename) {
     ? cleanPDFText(titleLine.text)
     : filename.replace(/\.pdf$/i, '').replace(/[_\-]+/g, ' ').trim();
 
-  // ---- Detect section boundaries ----
-  // Pass 1: exact header match
-  let ingStart = -1, ingEnd = -1, instStart = -1, instEnd = -1, notesStart = -1;
-  for (let i = 0; i < lines.length; i++) {
-    const clean = cleanPDFText(lines[i].text);
-    const isBoldOrLarge = lines[i].bold || lines[i].fontSize > avgBodyFontSize * 1.15;
+  // ---- Check for Chefkoch-style two-column layout ----
+  const { isChefkoch, midX, zutatenLine } = detectColumnLayout(lines);
 
-    if (ingStart === -1 && (SECTION_PATTERNS.ingredients.test(clean) || (isBoldOrLarge && SECTION_FALLBACK.ingredients.test(clean)))) {
-      ingStart = i + 1;
-    }
-    if (instStart === -1 && (SECTION_PATTERNS.instructions.test(clean) || (isBoldOrLarge && SECTION_FALLBACK.instructions.test(clean)))) {
-      instStart = i + 1;
-      if (ingStart > -1 && ingEnd === -1) ingEnd = i;
-    }
-    if (notesStart === -1 && SECTION_PATTERNS.notes.test(clean) && instStart > -1) {
-      notesStart = i;
-      instEnd = i;
-    }
-  }
-
-  // Pass 2: loose fallback if sections not found
-  if (ingStart === -1) {
-    for (let i = 0; i < lines.length; i++) {
-      const clean = cleanPDFText(lines[i].text);
-      if (SECTION_FALLBACK.ingredients.test(clean)) { ingStart = i + 1; break; }
-    }
-  }
-  if (instStart === -1) {
-    for (let i = 0; i < lines.length; i++) {
-      const clean = cleanPDFText(lines[i].text);
-      if (SECTION_FALLBACK.instructions.test(clean)) {
-        instStart = i + 1;
-        if (ingStart > -1 && ingEnd === -1) ingEnd = i;
-        break;
-      }
-    }
-  }
-
-  // ---- Extract ingredients ----
   let ingredients = [];
-  if (ingStart > -1) {
-    const end = ingEnd > ingStart ? ingEnd : (instStart > ingStart ? instStart - 1 : Math.min(ingStart + 40, lines.length));
-    const ingLines = lines.slice(ingStart, end);
-
-    // Detect two-column layout: if many lines have x > page midpoint, split by x
-    const xs = ingLines.map(l => l.x);
-    const midX = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : 999;
-    const hasRightColumn = ingLines.filter(l => l.x > midX + 50).length > 3;
-
-    if (hasRightColumn) {
-      // Interleave left and right columns sorted by Y
-      const left = ingLines.filter(l => l.x <= midX + 50).sort((a,b) => a.pageY - b.pageY);
-      const right = ingLines.filter(l => l.x > midX + 50).sort((a,b) => a.pageY - b.pageY);
-      const merged = [];
-      const maxLen = Math.max(left.length, right.length);
-      for (let i = 0; i < maxLen; i++) {
-        if (left[i]) merged.push(left[i]);
-        if (right[i]) merged.push(right[i]);
-      }
-      ingredients = merged;
-    } else {
-      ingredients = ingLines;
-    }
-
-    // Score and filter
-    ingredients = ingredients
-      .map(l => ({ ...l, score: scoreIngredientLine(l.text, l.fontSize, l.bold, avgBodyFontSize) }))
-      .filter(l => l.score >= 20)
-      .map(l => ({ text: cleanPDFText(l.text) }))
-      .filter(l => l.text.length > 1);
-
-    // If scoring filtered everything out, fall back to all lines in the section
-    if (!ingredients.length) {
-      ingredients = ingLines
-        .map(l => ({ text: cleanPDFText(l.text) }))
-        .filter(l => l.text.length > 1 && l.text.length < 150);
-    }
-  }
-
-  // ---- Extract instructions ----
   let instructionSteps = [];
-  if (instStart > -1) {
-    const end = instEnd > instStart ? instEnd : lines.length;
-    const instLines = lines.slice(instStart, end);
 
-    // Merge wrapped lines: if a line doesn't start a new step (no number, no bullet, not bold),
-    // append it to the previous step
-    const rawSteps = [];
-    let current = '';
-    for (const l of instLines) {
-      const clean = cleanPDFText(l.text);
-      if (!clean) continue;
-      const startsNew = /^\d+[\.\)]\s/.test(clean)   // numbered step
-        || BULLET_RE.test(l.text)                     // bullet
-        || (l.bold && clean.length < 80)              // bold short header
-        || (current.length > 0 && clean.length > 15 && /^[A-ZÜÄÖA-Z]/.test(clean) && current.endsWith('.'))
-                                                       // new sentence starting with capital after period
-        || current === '';
-      if (startsNew && current) {
-        rawSteps.push(current.trim());
-        current = clean;
-      } else {
-        current += (current ? ' ' : '') + clean;
-      }
-    }
-    if (current.trim()) rawSteps.push(current.trim());
+  if (isChefkoch) {
+    // LEFT = instructions, RIGHT = ingredients
+    const leftLines = lines.filter(l => l.x <= midX).sort((a,b) => a.pageY - b.pageY);
+    const rightLines = lines.filter(l => l.x > midX).sort((a,b) => a.pageY - b.pageY);
 
-    // Clean step numbering prefixes
-    instructionSteps = rawSteps
-      .map(s => s.replace(/^\d+[\.\):\s]+/, '').trim())
-      .filter(s => s.length > 8);
-  }
+    // Ingredients: right column, starting after "Zutaten für X Portionen:"
+    const zutatenIdx = rightLines.findIndex(l =>
+      /zutaten\s*(f[üu]r|for)?\s*(\d+)?/i.test(l.text)
+    );
+    const ingLines = zutatenIdx >= 0
+      ? rightLines.slice(zutatenIdx + 1)
+      : rightLines;
 
-  // ---- Fallback: no sections detected — use intelligent heuristics ----
-  if (!ingredients.length && !instructionSteps.length) {
-    const bodyLines = lines.filter(l => cleanPDFText(l.text).length > 1);
-    const scored = bodyLines.map(l => ({
-      ...l,
-      clean: cleanPDFText(l.text),
-      ingScore: scoreIngredientLine(l.text, l.fontSize, l.bold, avgBodyFontSize),
-    }));
+    // Filter out meta lines (Rezept von, etc.) and collect ingredients
+    // In Chefkoch layout, ingredients are: "150 g  Mehl" (amount in bold-ish left part, name on right)
+    // But since they're on the same visual line, they come merged
+    ingredients = ingLines
+      .map(l => ({ text: cleanPDFText(l.text) }))
+      .filter(l => {
+        const t = l.text;
+        if (!t || t.length < 2) return false;
+        // Skip meta lines
+        if (/^(rezept\s*von|difficulty|schwierigkeit|kalorien|calories|arbeitszeit|gesamtzeit|koch|back|gesamt)/i.test(t)) return false;
+        // Skip "Majoran zum Garnieren" type lines? No - those ARE ingredients
+        // Skip very long description-like lines
+        if (t.length > 100) return false;
+        // Skip lines that are clearly not ingredients (no quantity and not a recognizable ingredient word)
+        // Be generous - include most right-column lines
+        return true;
+      });
 
-    ingredients = scored
-      .filter(l => l.ingScore >= 30)
-      .slice(0, 35)
-      .map(l => ({ text: l.clean }));
+    // Instructions: left column prose
+    // Filter out the title line and header-like lines
+    const instLines = leftLines.filter(l => {
+      const cl = cleanPDFText(l.text);
+      if (!cl || cl.length < 5) return false;
+      // Skip if it matches the title
+      if (cl.toLowerCase() === title.toLowerCase()) return false;
+      // Skip "Zubereitung" header itself
+      if (/^(zubereitung|preparation|instructions?)\s*:?$/i.test(cl)) return false;
+      return true;
+    });
 
-    const instLines = scored
-      .filter(l => l.ingScore < 30 && l.clean.length > 20)
-      .map(l => l.clean);
-
-    // Merge into steps
+    // Merge instruction lines into paragraphs/steps
     let step = '';
-    for (const line of instLines) {
-      if (/[.!?]$/.test(step) && /^[A-ZÜÄÖ]/.test(line) && step.length > 30) {
+    for (const l of instLines) {
+      const cl = cleanPDFText(l.text);
+      // A new paragraph starts if: previous ended with period AND this starts with capital
+      const prevEndsPeriod = step.endsWith('.');
+      const startsCapital = /^[A-ZÜÄÖA-Z]/.test(cl);
+      if (prevEndsPeriod && startsCapital && step.length > 40) {
         if (step.trim()) instructionSteps.push(step.trim());
-        step = line;
+        step = cl;
       } else {
-        step += (step ? ' ' : '') + line;
+        step += (step ? ' ' : '') + cl;
       }
     }
     if (step.trim()) instructionSteps.push(step.trim());
+    // Split long combined steps at sentence boundaries
+    const finalSteps = [];
+    for (const s of instructionSteps) {
+      // If a step is very long, split at sentence boundaries
+      if (s.length > 300) {
+        const sentences = s.split(/(?<=[.!?])\s+(?=[A-ZÜÄÖ])/);
+        finalSteps.push(...sentences.filter(x=>x.trim().length > 8));
+      } else {
+        finalSteps.push(s);
+      }
+    }
+    instructionSteps = finalSteps;
+
+  } else {
+    // ---- Standard linear parsing (non-Chefkoch) ----
+    let ingStart = -1, ingEnd = -1, instStart = -1, instEnd = -1, notesStart = -1;
+    for (let i = 0; i < lines.length; i++) {
+      const clean = cleanPDFText(lines[i].text);
+      const isBoldOrLarge = lines[i].bold || lines[i].fontSize > avgBodyFontSize * 1.15;
+      if (ingStart === -1 && (SECTION_PATTERNS.ingredients.test(clean) || (isBoldOrLarge && SECTION_FALLBACK.ingredients.test(clean)))) {
+        ingStart = i + 1;
+      }
+      if (instStart === -1 && (SECTION_PATTERNS.instructions.test(clean) || (isBoldOrLarge && SECTION_FALLBACK.instructions.test(clean)))) {
+        instStart = i + 1;
+        if (ingStart > -1 && ingEnd === -1) ingEnd = i;
+      }
+      if (notesStart === -1 && SECTION_PATTERNS.notes.test(clean) && instStart > -1) {
+        notesStart = i; instEnd = i;
+      }
+    }
+    // Fallbacks
+    if (ingStart === -1) {
+      for (let i = 0; i < lines.length; i++) {
+        if (SECTION_FALLBACK.ingredients.test(cleanPDFText(lines[i].text))) { ingStart = i+1; break; }
+      }
+    }
+    if (instStart === -1) {
+      for (let i = 0; i < lines.length; i++) {
+        if (SECTION_FALLBACK.instructions.test(cleanPDFText(lines[i].text))) {
+          instStart = i+1; if (ingStart > -1 && ingEnd === -1) ingEnd = i; break;
+        }
+      }
+    }
+
+    // Extract ingredients
+    if (ingStart > -1) {
+      const end = ingEnd > ingStart ? ingEnd : (instStart > ingStart ? instStart-1 : Math.min(ingStart+40, lines.length));
+      const ingLines = lines.slice(ingStart, end);
+      ingredients = ingLines
+        .map(l => ({ ...l, score: scoreIngredientLine(l.text, l.fontSize, l.bold, avgBodyFontSize) }))
+        .filter(l => l.score >= 20)
+        .map(l => ({ text: cleanPDFText(l.text) }))
+        .filter(l => l.text.length > 1);
+      if (!ingredients.length) {
+        ingredients = ingLines.map(l=>({text:cleanPDFText(l.text)})).filter(l=>l.text.length>1&&l.text.length<150);
+      }
+    }
+
+    // Extract instructions
+    if (instStart > -1) {
+      const end = instEnd > instStart ? instEnd : lines.length;
+      const instLines = lines.slice(instStart, end);
+      let current = '';
+      for (const l of instLines) {
+        const clean = cleanPDFText(l.text);
+        if (!clean) continue;
+        const startsNew = /^\d+[\.\)]\s/.test(clean) || BULLET_RE.test(l.text) || (l.bold && clean.length < 80)
+          || (current.length > 0 && clean.length > 15 && /^[A-ZÜÄÖ]/.test(clean) && current.endsWith('.')) || current === '';
+        if (startsNew && current) { instructionSteps.push(current.trim()); current = clean; }
+        else { current += (current ? ' ' : '') + clean; }
+      }
+      if (current.trim()) instructionSteps.push(current.trim());
+      instructionSteps = instructionSteps.map(s=>s.replace(/^\d+[\.\):\s]+/,'').trim()).filter(s=>s.length>8);
+    }
+
+    // Fallback: heuristic scoring
+    if (!ingredients.length && !instructionSteps.length) {
+      const bodyLines = lines.filter(l=>cleanPDFText(l.text).length>1);
+      const scored = bodyLines.map(l=>({...l, clean:cleanPDFText(l.text), ingScore:scoreIngredientLine(l.text,l.fontSize,l.bold,avgBodyFontSize)}));
+      ingredients = scored.filter(l=>l.ingScore>=30).slice(0,35).map(l=>({text:l.clean}));
+      const instLines = scored.filter(l=>l.ingScore<30&&l.clean.length>20).map(l=>l.clean);
+      let step='';
+      for (const line of instLines) {
+        if (/[.!?]$/.test(step)&&/^[A-ZÜÄÖ]/.test(line)&&step.length>30) { if(step.trim()) instructionSteps.push(step.trim()); step=line; }
+        else { step+=(step?' ':'')+line; }
+      }
+      if (step.trim()) instructionSteps.push(step.trim());
+    }
   }
 
   // ---- Meta extraction ----
-  const fullText = lines.map(l => l.text).join(' ');
-
-  // Cook time — look for explicit patterns
+  const fullText = lines.map(l=>l.text).join(' ');
   const timeMatch = fullText.match(/(\d+)\s*(?:–|-|to|bis)?\s*(\d+)?\s*(min(?:utes?)?|minuten?|std\.?|stunden?|h(?:ours?)?)\b/i);
   let time = null;
   if (timeMatch) {
-    const num = timeMatch[2] ? Math.round((+timeMatch[1] + +timeMatch[2]) / 2) : +timeMatch[1];
+    const num = timeMatch[2] ? Math.round((+timeMatch[1]+ +timeMatch[2])/2) : +timeMatch[1];
     const isHour = /std|stunden?|h(?:our)?/i.test(timeMatch[3]);
-    time = isHour ? num * 60 : num;
-    if (time > 600) time = null; // sanity cap
+    time = isHour ? num*60 : num;
+    if (time > 600) time = null;
   }
-
-  // Servings
   const servingsMatch = fullText.match(/(\d+)\s*(portion[e]?[n]?|serving[s]?|person[e]?[n]?|personen|serves?)\b/i);
   const servings = servingsMatch ? +servingsMatch[1] : null;
-
-  // Calories
   const calMatch = fullText.match(/(\d{2,4})\s*(kcal|kalorien|calories?)\b/i);
   const calories = calMatch ? +calMatch[1] : null;
-
-  // Difficulty
   const steps = instructionSteps.length;
-  const difficulty = (time && time < 25) || steps <= 3 ? 'easy'
-    : (time && time < 60) || steps <= 8 ? 'medium'
-    : 'hard';
+  const difficulty = (time&&time<25)||steps<=3?'easy':(time&&time<60)||steps<=8?'medium':'hard';
 
-  // Category from keywords
   const textLower = fullText.toLowerCase();
   const categories = [
-    [/\b(cake|torte|kuchen|tart|pie|brownie|muffin|cookie|biscuit|dessert|pudding|mousse|cheesecake)\b/, 'Dessert'],
-    [/\b(soup|suppe|broth|bouillon|stew|eintopf|bisque|chowder)\b/, 'Soup'],
-    [/\b(salad|salat|slaw|carpaccio)\b/, 'Salad'],
-    [/\b(pasta|spaghetti|penne|rigatoni|linguine|tagliatelle|fettuccine|lasagna|lasagne|ravioli|gnocchi)\b/, 'Pasta'],
-    [/\b(pizza|flatbread)\b/, 'Pizza'],
-    [/\b(bread|brot|brötchen|roll|baguette|focaccia|sourdough|sauerteig)\b/, 'Bread'],
-    [/\b(risotto)\b/, 'Risotto'],
-    [/\b(steak|beef|rind|rindfleisch)\b/, 'Beef'],
-    [/\b(chicken|hähnchen|hühnchen|huhn|poultry|geflügel)\b/, 'Chicken'],
-    [/\b(pork|schwein|schweinefleisch|bacon|speck|ham|schinken)\b/, 'Pork'],
-    [/\b(fish|fisch|salmon|lachs|tuna|thunfisch|cod|kabeljau|shrimp|garnele)\b/, 'Seafood'],
-    [/\b(vegetarian|vegetarisch|vegan)\b/, 'Vegetarian'],
-    [/\b(smoothie|shake|drink|juice|saft|cocktail|beverage|getränk)\b/, 'Drinks'],
-    [/\b(breakfast|frühstück|pancake|pfannkuchen|waffle|waffel|omelette|omelet|müsli|granola)\b/, 'Breakfast'],
+    [/\b(cake|torte|kuchen|tart|pie|brownie|muffin|cookie|biscuit|dessert|pudding|mousse|cheesecake)\b/,'Dessert'],
+    [/\b(soup|suppe|broth|bouillon|stew|eintopf|bisque|chowder)\b/,'Soup'],
+    [/\b(salad|salat|slaw|carpaccio)\b/,'Salad'],
+    [/\b(pasta|spaghetti|penne|rigatoni|linguine|tagliatelle|fettuccine|lasagna|lasagne|ravioli|gnocchi)\b/,'Pasta'],
+    [/\b(pizza|flatbread)\b/,'Pizza'],
+    [/\b(bread|brot|brötchen|roll|baguette|focaccia|sourdough|sauerteig)\b/,'Bread'],
+    [/\b(risotto)\b/,'Risotto'],
+    [/\b(steak|beef|rind|rindfleisch)\b/,'Beef'],
+    [/\b(chicken|hähnchen|hühnchen|huhn|poultry|geflügel)\b/,'Chicken'],
+    [/\b(pork|schwein|schweinefleisch|bacon|speck|ham|schinken)\b/,'Pork'],
+    [/\b(fish|fisch|salmon|lachs|tuna|thunfisch|cod|kabeljau|shrimp|garnele)\b/,'Seafood'],
+    [/\b(vegetarian|vegetarisch|vegan)\b/,'Vegetarian'],
+    [/\b(smoothie|shake|drink|juice|saft|cocktail|beverage|getränk)\b/,'Drinks'],
+    [/\b(breakfast|frühstück|pancake|pfannkuchen|waffle|waffel|omelette|omelet|müsli|granola)\b/,'Breakfast'],
   ];
   let category = '';
-  for (const [re, cat] of categories) {
-    if (re.test(textLower)) { category = cat; break; }
-  }
+  for (const [re, cat] of categories) { if (re.test(textLower)) { category=cat; break; } }
 
-  // Diet tags
   const tags = [];
   if (/\b(vegan)\b/.test(textLower)) tags.push('Vegan');
   else if (/\b(vegetarisch|vegetarian)\b/.test(textLower)) tags.push('Vegetarian');
@@ -1214,33 +1360,162 @@ function parseRecipeFromLines(lines, filename) {
 
   return {
     id: 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2),
-    title,
-    image: null,
-    category,
-    area: '',
-    time,
-    servings,
-    calories,
-    difficulty,
-    tags,
+    title, image: null, pdfImageDataUrl: null,
+    category, area: '', time, servings, calories, difficulty, tags,
     ingredients,
     instructions: instructionSteps.join('\n'),
-    source: 'local',
-    isLocal: true,
-    addedAt: Date.now(),
-    filename,
+    source: 'local', isLocal: true, addedAt: Date.now(), filename,
     _stats: { ingCount: ingredients.length, stepCount: instructionSteps.length },
   };
 }
+async function extractPdfImage(arrayBuffer) {
+  // Render first page of PDF to canvas and return as data URL
+  // For Chefkoch-style: the food image is in the top-right quadrant
+  try {
+    if (typeof pdfjsLib === 'undefined') return null;
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+    const page = await pdf.getPage(1);
+    const scale = 1.5;
+    const vp = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width = vp.width;
+    canvas.height = vp.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
 
+    // Try to detect if there's an image in the right half (Chefkoch layout)
+    // Crop the right ~48% and top ~40% for the food photo
+    const cropX = Math.floor(vp.width * 0.48);
+    const cropY = 0;
+    const cropW = vp.width - cropX;
+    const cropH = Math.floor(vp.height * 0.40);
+
+    // Check if that region has non-white pixels (actual image content)
+    const imgData = ctx.getImageData(cropX, cropY, cropW, cropH);
+    let nonWhite = 0;
+    for (let i = 0; i < imgData.data.length; i+=4) {
+      const r=imgData.data[i], g=imgData.data[i+1], b=imgData.data[i+2];
+      if (r < 240 || g < 240 || b < 240) nonWhite++;
+    }
+    const coverage = nonWhite / (cropW * cropH);
+
+    if (coverage > 0.1) {
+      // There's an image there — crop it out
+      const cropCanvas = document.createElement('canvas');
+      cropCanvas.width = cropW;
+      cropCanvas.height = cropH;
+      cropCanvas.getContext('2d').putImageData(imgData, 0, 0);
+      return cropCanvas.toDataURL('image/jpeg', 0.82);
+    }
+
+    // Fallback: try full top strip
+    const topData = ctx.getImageData(0, 0, vp.width, Math.floor(vp.height * 0.35));
+    let topNonWhite = 0;
+    for (let i = 0; i < topData.data.length; i+=4) {
+      const r=topData.data[i], g=topData.data[i+1], b=topData.data[i+2];
+      if (r < 235 || g < 235 || b < 235) topNonWhite++;
+    }
+    if (topNonWhite / (vp.width * Math.floor(vp.height * 0.35)) > 0.08) {
+      const fallbackCanvas = document.createElement('canvas');
+      fallbackCanvas.width = vp.width;
+      fallbackCanvas.height = Math.floor(vp.height * 0.35);
+      fallbackCanvas.getContext('2d').putImageData(topData, 0, 0);
+      return fallbackCanvas.toDataURL('image/jpeg', 0.75);
+    }
+
+    return null;
+  } catch(e) {
+    console.warn('PDF image extraction failed:', e);
+    return null;
+  }
+}
+
+async function handleFiles(files) {
+  const progress = document.getElementById('upload-progress');
+  const progressBar = document.getElementById('progress-bar');
+  const progressLabel = document.getElementById('progress-label');
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (!file.name.toLowerCase().endsWith('.pdf')) continue;
+
+    progress.classList.add('visible');
+    progressLabel.textContent = t('upload.processing') + ' ' + file.name;
+    progressBar.style.width = '10%';
+
+    try {
+      const rawBuffer = await file.arrayBuffer();
+      progressBar.style.width = '25%';
+
+      progressLabel.textContent = t('upload.processing') + ' ' + file.name;
+
+      // PDF.js TRANSFERS (detaches) ArrayBuffers, so we must copy for each use
+      let pdfImageDataUrl = null;
+      try {
+        pdfImageDataUrl = await extractPdfImage(rawBuffer.slice(0));
+      } catch(imgErr) {
+        console.warn('Image extraction failed (non-fatal):', imgErr);
+      }
+      progressBar.style.width = '50%';
+
+      const structuredLines = await extractStructuredLines(rawBuffer.slice(0));
+      progressBar.style.width = '70%';
+      progressBar.style.width = '70%';
+
+      const recipe = parseRecipeFromLines(structuredLines, file.name);
+      if (!recipe) throw new Error('Could not parse recipe structure');
+
+      // Attach the extracted image
+      if (pdfImageDataUrl) recipe.pdfImageDataUrl = pdfImageDataUrl;
+
+      // Quality gate: if we got < 2 ingredients and < 1 step, warn user
+      const ingOk = recipe.ingredients.length >= 1;
+      const stepOk = recipe.instructions.trim().length > 10;
+      if (!ingOk && !stepOk) {
+        progressLabel.textContent = '⚠ Low confidence parse — check result: ' + recipe.title;
+      } else {
+        progressLabel.textContent = t('upload.done') + ' — ' + recipe.title
+          + ' (' + recipe.ingredients.length + ' ingredients, '
+          + recipe._stats.stepCount + ' steps)';
+      }
+
+      state.localRecipes.unshift(recipe);
+      saveLocalRecipes();
+      progressBar.style.width = '100%';
+    } catch (e) {
+      progressLabel.textContent = t('upload.error') + ' ' + file.name + ' — ' + (e.message || e);
+      console.error('PDF parse error:', e);
+    }
+
+    await new Promise(r => setTimeout(r, 900));
+  }
+
+  progressBar.style.width = '0%';
+  setTimeout(() => progress.classList.remove('visible'), 600);
+  renderLocalRecipesList();
+}
+
+// ============================================================
+//  LOCAL RECIPE HELPERS (accidentally removed — restored)
+// ============================================================
 function saveLocalRecipes() {
-  localStorage.setItem('ff-local-recipes', JSON.stringify(state.localRecipes));
+  // pdfImageDataUrl can be large — store without it to avoid localStorage quota issues
+  const toStore = state.localRecipes.map(r => {
+    const { pdfImageDataUrl, ...rest } = r;
+    return rest;
+  });
+  try {
+    localStorage.setItem('ff-local-recipes', JSON.stringify(toStore));
+  } catch(e) {
+    console.warn('localStorage quota exceeded, trying without images:', e);
+    localStorage.setItem('ff-local-recipes', JSON.stringify(toStore));
+  }
 }
 
 function renderLocalRecipesList() {
   const container = document.getElementById('local-recipes-list');
-  if(!state.localRecipes.length){
-    container.innerHTML=`<p style="font-size:13px;color:var(--text-muted);padding:10px 0">${t('upload.noLocal')}</p>`;
+  if (!state.localRecipes.length) {
+    container.innerHTML = `<p style="font-size:13px;color:var(--text-muted);padding:10px 0">${t('upload.noLocal')}</p>`;
     return;
   }
   container.innerHTML = state.localRecipes.map(r => {
@@ -1265,69 +1540,17 @@ function renderLocalRecipesList() {
       </div>
     </div>`;
   }).join('');
-  container.querySelectorAll('.view-local').forEach(btn=>btn.addEventListener('click',()=>openModal(btn.dataset.id)));
-  container.querySelectorAll('.delete-local').forEach(btn=>btn.addEventListener('click',()=>deleteLocalRecipe(btn.dataset.id)));
+  container.querySelectorAll('.view-local').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.id)));
+  container.querySelectorAll('.delete-local').forEach(btn => btn.addEventListener('click', () => deleteLocalRecipe(btn.dataset.id)));
 }
 
 function deleteLocalRecipe(id) {
-  state.localRecipes = state.localRecipes.filter(r=>r.id!==id);
-  // Also remove from favorites if saved
-  state.favorites = state.favorites.filter(f=>f.id!==id);
+  state.localRecipes = state.localRecipes.filter(r => r.id !== id);
+  state.favorites = state.favorites.filter(f => f.id !== id);
   localStorage.setItem('ff-favorites', JSON.stringify(state.favorites));
   saveLocalRecipes();
   renderLocalRecipesList();
   renderFavorites();
-}
-
-async function handleFiles(files) {
-  const progress = document.getElementById('upload-progress');
-  const progressBar = document.getElementById('progress-bar');
-  const progressLabel = document.getElementById('progress-label');
-
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    if (!file.name.toLowerCase().endsWith('.pdf')) continue;
-
-    progress.classList.add('visible');
-    progressLabel.textContent = t('upload.processing') + ' ' + file.name;
-    progressBar.style.width = '10%';
-
-    try {
-      const buffer = await file.arrayBuffer();
-      progressBar.style.width = '35%';
-
-      // New pipeline: extract layout-aware lines, then parse
-      const structuredLines = await extractStructuredLines(buffer);
-      progressBar.style.width = '70%';
-
-      const recipe = parseRecipeFromLines(structuredLines, file.name);
-      if (!recipe) throw new Error('Could not parse recipe structure');
-
-      // Quality gate: if we got < 2 ingredients and < 1 step, warn user
-      const ingOk = recipe.ingredients.length >= 1;
-      const stepOk = recipe.instructions.trim().length > 10;
-      if (!ingOk && !stepOk) {
-        progressLabel.textContent = '⚠ Low confidence parse — check result: ' + recipe.title;
-      } else {
-        progressLabel.textContent = t('upload.done') + ' — ' + recipe.title
-          + ' (' + recipe.ingredients.length + ' ingredients, '
-          + recipe._stats.stepCount + ' steps)';
-      }
-
-      state.localRecipes.unshift(recipe);
-      saveLocalRecipes();
-      progressBar.style.width = '100%';
-    } catch (e) {
-      progressLabel.textContent = t('upload.error') + ' ' + file.name;
-      console.error('PDF parse error:', e);
-    }
-
-    await new Promise(r => setTimeout(r, 900));
-  }
-
-  progressBar.style.width = '0%';
-  setTimeout(() => progress.classList.remove('visible'), 600);
-  renderLocalRecipesList();
 }
 
 // ============================================================
@@ -1487,6 +1710,7 @@ document.getElementById('f-time').addEventListener('input',()=>{updateTimeDispla
 document.querySelectorAll('.sort-btn').forEach(btn=>btn.addEventListener('click',()=>setSort(btn.dataset.sort)));
 
 document.getElementById('btn-close-modal').addEventListener('click',closeModal);
+document.getElementById('btn-translate-modal').addEventListener('click',handleTranslateClick);
 document.getElementById('modal-overlay').addEventListener('click',e=>{ if(e.target===document.getElementById('modal-overlay')) closeModal(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
