@@ -211,18 +211,46 @@
 
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
+  /* ── SCORE ── */
+  .score-section{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+  .score-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;display:block}
+  .score-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .score-slider{flex:1;min-width:120px;accent-color:#fff;cursor:pointer}
+  .score-value{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--text-primary);min-width:38px;text-align:right}
+  .score-emoji{font-size:20px}
+  .btn-save-score{background:var(--surface-active);border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font-body);font-size:12px;padding:6px 14px;border-radius:6px;cursor:pointer;transition:var(--transition)}
+  .btn-save-score:hover{color:var(--text-primary);border-color:var(--border-glow)}
+  .score-badge{display:inline-block;background:var(--surface-active);border:1px solid var(--border);border-radius:5px;font-family:var(--font-display);font-size:11px;font-weight:700;padding:2px 8px;color:var(--text-secondary);margin-left:8px;vertical-align:middle}
+  .card-score{position:absolute;bottom:10px;right:10px;background:rgba(9,9,9,.82);border:1px solid rgba(255,255,255,.18);border-radius:5px;font-size:10px;font-weight:700;font-family:var(--font-display);padding:3px 7px;color:var(--text-primary);backdrop-filter:blur(8px)}
+
+  /* ── PDF AI BADGE ── */
+  .ai-parsed-note{font-size:11px;color:var(--text-muted);padding:8px 12px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:7px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+  .ing-uncertain{border-style:dashed;opacity:.7}
+
+  @media(max-width:700px){
+    .navbar{padding:0 12px;height:56px}
+    .nav-logo{font-size:17px}
+    .nav-right{gap:5px}
+    .btn-nav{padding:5px 8px;font-size:11px}
+    .btn-lang{padding:5px 10px;font-size:11px}
+  }
   @media(max-width:600px){
     .hero{padding:40px 0 28px}
     .search-box{flex-wrap:wrap}
     .btn-search{flex:1}
     .filter-grid,.ingredients-list{grid-template-columns:1fr}
     .modal-img{height:170px}
-    .modal-header,.modal-body,.modal-footer{padding-left:16px;padding-right:16px}
-    .modal-footer{flex-direction:column}
-    .btn-save-recipe,.btn-close-modal{width:100%;text-align:center}
+    .modal-header,.modal-body,.modal-footer{padding-left:14px;padding-right:14px}
+    .modal-footer{flex-direction:column;gap:8px}
+    .modal-footer>div{width:100%;display:flex;flex-direction:column;gap:8px}
+    .btn-save-recipe,.btn-close-modal,.btn-translate{width:100%;text-align:center;justify-content:center}
     .results-grid{grid-template-columns:1fr}
-    .nav-right{gap:6px}
-    .btn-nav{padding:6px 10px;font-size:12px}
+    .nav-right{gap:4px}
+    .btn-nav{padding:4px 7px;font-size:11px;letter-spacing:0}
+    .btn-lang{padding:4px 8px;font-size:10px}
+    .local-recipe-row{flex-direction:column;align-items:flex-start}
+    .local-recipe-actions{width:100%;justify-content:flex-start}
+    .sort-bar{flex-direction:column;align-items:flex-start}
   }
   ::-webkit-scrollbar{width:5px}
   ::-webkit-scrollbar-track{background:transparent}
@@ -356,6 +384,15 @@
           <span id="btn-translate-label">🌐 Translate</span>
         </button>
         <button class="btn-save-recipe" id="btn-save-modal" data-i18n="modal.save">Save to Favorites</button>
+      </div>
+    </div>
+    <div class="score-section" id="score-section" style="display:none;padding:0 28px 20px">
+      <span class="score-label">Rate this recipe</span>
+      <div class="score-row">
+        <span class="score-emoji" id="score-emoji">😐</span>
+        <input type="range" class="score-slider" id="score-slider" min="0" max="100" step="1" value="70">
+        <span class="score-value" id="score-display">70</span>
+        <button class="btn-save-score" id="btn-save-score">Save score</button>
       </div>
     </div>
   </div>
@@ -505,6 +542,7 @@ let state = {
   filteredRecipes: [],
   favorites: JSON.parse(localStorage.getItem('ff-favorites') || '[]'),
   localRecipes: JSON.parse(localStorage.getItem('ff-local-recipes') || '[]'),
+  scores: JSON.parse(localStorage.getItem('ff-scores') || '{}'),
   currentRecipe: null,
   loading: false,
   sortBy: 'relevance',
@@ -735,6 +773,8 @@ function buildCard(recipe, isFav=false) {
       ? `<img class="card-img" src="${recipe.pdfImageDataUrl}" alt="${recipe.title}" loading="lazy" style="object-position:top">`
       : `<div class="card-placeholder">${recipe.title.charAt(0)}</div>`;
   const localBadge = recipe.isLocal ? `<span class="local-badge">${t('local.badge')}</span>` : '';
+  const score = state.scores[String(recipe.id)];
+  const scoreBadge = score !== undefined ? `<span class="card-score">${score}/100</span>` : '';
   return `
   <article class="recipe-card${recipe.isLocal?' local-card':''}" data-id="${recipe.id}" tabindex="0" role="button" aria-label="${recipe.title}">
     <div class="card-img-wrap">
@@ -742,6 +782,7 @@ function buildCard(recipe, isFav=false) {
       <button class="card-fav-btn${isSaved?' saved':''}" data-id="${recipe.id}">${favLabel}</button>
       ${localBadge}
       ${tags?`<div class="card-tags">${tags}</div>`:''}
+      ${scoreBadge}
     </div>
     <div class="card-body">
       <h3 class="card-title">${recipe.title}</h3>
@@ -803,6 +844,22 @@ async function openModal(id) {
   saveBtn.textContent = isSaved ? t('modal.saved') : t('modal.save');
   saveBtn.className = 'btn-save-recipe'+(isSaved?' saved':'');
 
+  // Score section — always show for saved recipes
+  const scoreSection = document.getElementById('score-section');
+  const scoreSlider = document.getElementById('score-slider');
+  const scoreDisplay = document.getElementById('score-display');
+  const scoreEmoji = document.getElementById('score-emoji');
+  if (isSaved) {
+    scoreSection.style.display = 'block';
+    const existingScore = state.scores[String(recipe.id)];
+    const sv = existingScore !== undefined ? existingScore : 70;
+    scoreSlider.value = sv;
+    scoreDisplay.textContent = sv;
+    scoreEmoji.textContent = scoreToEmoji(sv);
+  } else {
+    scoreSection.style.display = 'none';
+  }
+
   // Show translate button for API recipes (likely English) or local German recipes
   const translateBtn = document.getElementById('btn-translate-modal');
   const translateLabel = document.getElementById('btn-translate-label');
@@ -830,6 +887,12 @@ async function openModal(id) {
 
 function renderModalContent(ingredients, instructions, translated) {
   let bodyHTML='';
+  const recipe = state.currentRecipe;
+
+  if (recipe && recipe._aiParsed) {
+    bodyHTML += `<div class="ai-parsed-note">✨ AI-parsed from PDF — ingredients and instructions automatically identified</div>`;
+  }
+
   if(ingredients&&ingredients.length) {
     bodyHTML+=`<p class="modal-section-title">${t('modal.ingredients')}</p>
     <div class="ingredients-list">${ingredients.map(i=>`<div class="ingredient-item">${i.text}</div>`).join('')}</div>`;
@@ -935,6 +998,23 @@ function closeModal() {
   document.body.style.overflow='';
 }
 
+function scoreToEmoji(v) {
+  if (v >= 90) return '🤩';
+  if (v >= 75) return '😋';
+  if (v >= 55) return '😊';
+  if (v >= 35) return '😐';
+  if (v >= 15) return '😕';
+  return '😬';
+}
+
+function saveRecipeScore(id, score) {
+  state.scores[String(id)] = score;
+  localStorage.setItem('ff-scores', JSON.stringify(state.scores));
+  // Refresh cards to show updated score badge
+  if (state.filteredRecipes.length) renderResults(state.filteredRecipes, 'results-grid');
+  renderFavorites();
+}
+
 // ============================================================
 //  FAVORITES
 // ============================================================
@@ -942,9 +1022,23 @@ function toggleFavorite(id) {
   const idx = state.favorites.findIndex(f=>String(f.id)===String(id));
   if(idx>-1) {
     state.favorites.splice(idx,1);
+    // Hide score section if currently viewing this recipe
+    if(state.currentRecipe && String(state.currentRecipe.id)===String(id)){
+      document.getElementById('score-section').style.display='none';
+    }
   } else {
     const recipe = [...state.recipes, ...state.favorites, ...state.localRecipes].find(r=>String(r.id)===String(id));
     if(recipe) state.favorites.push(recipe);
+    // Show score section if currently viewing this recipe
+    if(state.currentRecipe && String(state.currentRecipe.id)===String(id)){
+      const scoreSection = document.getElementById('score-section');
+      scoreSection.style.display = 'block';
+      const existingScore = state.scores[String(id)];
+      const sv = existingScore !== undefined ? existingScore : 70;
+      document.getElementById('score-slider').value = sv;
+      document.getElementById('score-display').textContent = sv;
+      document.getElementById('score-emoji').textContent = scoreToEmoji(sv);
+    }
   }
   localStorage.setItem('ff-favorites', JSON.stringify(state.favorites));
   refreshFavButtons(id);
@@ -1456,11 +1550,10 @@ async function handleFiles(files) {
       } catch(imgErr) {
         console.warn('Image extraction failed (non-fatal):', imgErr);
       }
-      progressBar.style.width = '50%';
+      progressBar.style.width = '40%';
 
       const structuredLines = await extractStructuredLines(rawBuffer.slice(0));
-      progressBar.style.width = '70%';
-      progressBar.style.width = '70%';
+      progressBar.style.width = '60%';
 
       const recipe = parseRecipeFromLines(structuredLines, file.name);
       if (!recipe) throw new Error('Could not parse recipe structure');
@@ -1468,13 +1561,41 @@ async function handleFiles(files) {
       // Attach the extracted image
       if (pdfImageDataUrl) recipe.pdfImageDataUrl = pdfImageDataUrl;
 
-      // Quality gate: if we got < 2 ingredients and < 1 step, warn user
+      // ── AI improvement step: send raw text to Claude for smart parsing ──
+      const rawText = structuredLines.map(l => l.text).join('\n');
+      progressLabel.textContent = '🤖 AI is reading the recipe...';
+      progressBar.style.width = '75%';
+
+      try {
+        const aiResult = await aiParseRecipe(rawText, recipe.title);
+        if (aiResult) {
+          if (aiResult.title) recipe.title = aiResult.title;
+          if (aiResult.ingredients && aiResult.ingredients.length > 0) {
+            recipe.ingredients = aiResult.ingredients.map(t => ({ text: t }));
+            recipe._aiParsed = true;
+          }
+          if (aiResult.instructions && aiResult.instructions.length > 0) {
+            recipe.instructions = aiResult.instructions.join('\n');
+            recipe._aiParsed = true;
+          }
+          if (aiResult.category) recipe.category = aiResult.category;
+          if (aiResult.time) recipe.time = aiResult.time;
+          recipe._stats = { ingCount: recipe.ingredients.length, stepCount: aiResult.instructions?.length || recipe._stats.stepCount };
+        }
+      } catch(aiErr) {
+        console.warn('AI parsing failed, using basic parse:', aiErr);
+      }
+
+      progressBar.style.width = '90%';
+
+      // Quality gate
       const ingOk = recipe.ingredients.length >= 1;
       const stepOk = recipe.instructions.trim().length > 10;
+      const aiTag = recipe._aiParsed ? ' (AI parsed)' : '';
       if (!ingOk && !stepOk) {
         progressLabel.textContent = '⚠ Low confidence parse — check result: ' + recipe.title;
       } else {
-        progressLabel.textContent = t('upload.done') + ' — ' + recipe.title
+        progressLabel.textContent = t('upload.done') + aiTag + ' — ' + recipe.title
           + ' (' + recipe.ingredients.length + ' ingredients, '
           + recipe._stats.stepCount + ' steps)';
       }
@@ -1493,6 +1614,62 @@ async function handleFiles(files) {
   progressBar.style.width = '0%';
   setTimeout(() => progress.classList.remove('visible'), 600);
   renderLocalRecipesList();
+}
+
+// ============================================================
+//  AI RECIPE PARSER — uses Claude to intelligently extract
+//  ingredients vs instructions from raw PDF text
+// ============================================================
+async function aiParseRecipe(rawText, knownTitle) {
+  // Truncate very long text to avoid token limits
+  const text = rawText.length > 4000 ? rawText.slice(0, 4000) : rawText;
+
+  const prompt = `You are a recipe parser. I will give you raw text extracted from a recipe PDF. It may contain messy formatting, page numbers, copyright notices, website URLs, nutritional disclaimers, and other non-recipe content.
+
+Your job: Extract ONLY the actual recipe content and return a clean JSON object.
+
+Rules:
+- ingredients: array of strings. Each string = one ingredient with amount (e.g. "200g flour", "2 eggs", "1 tsp salt"). Do NOT include page numbers, instructions, or metadata.
+- instructions: array of strings. Each string = one clear cooking step. Do NOT include ingredient lines.
+- title: the recipe name (string)
+- category: one of: Dessert, Soup, Salad, Pasta, Pizza, Bread, Beef, Chicken, Pork, Seafood, Vegetarian, Breakfast, Drinks, Other
+- time: cooking time in minutes as a number, or null if unknown
+
+IMPORTANT: If a line looks like an ingredient (has amount + food name), put it in ingredients. If it's a cooking instruction, put it in instructions. If it's metadata (author, website, copyright, nutrition info, "Rezept von", difficulty rating, etc.) — SKIP IT ENTIRELY.
+
+Return ONLY valid JSON, no explanation, no markdown.
+
+PDF text:
+${text}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) throw new Error('AI API error: ' + response.status);
+  const data = await response.json();
+  const text2 = data.content.map(c => c.text || '').join('');
+
+  // Strip any markdown fences
+  const clean = text2.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  try {
+    return JSON.parse(clean);
+  } catch(e) {
+    // Try to extract JSON object from response
+    const match = clean.match(/\{[\s\S]+\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error('Could not parse AI response as JSON');
+  }
 }
 
 // ============================================================
@@ -1715,6 +1892,21 @@ document.getElementById('modal-overlay').addEventListener('click',e=>{ if(e.targ
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
 document.getElementById('btn-save-modal').addEventListener('click',()=>{ if(state.currentRecipe) toggleFavorite(state.currentRecipe.id); });
+
+// Score slider
+document.getElementById('score-slider').addEventListener('input', e => {
+  const v = +e.target.value;
+  document.getElementById('score-display').textContent = v;
+  document.getElementById('score-emoji').textContent = scoreToEmoji(v);
+});
+document.getElementById('btn-save-score').addEventListener('click', () => {
+  if (!state.currentRecipe) return;
+  const v = +document.getElementById('score-slider').value;
+  saveRecipeScore(state.currentRecipe.id, v);
+  const btn = document.getElementById('btn-save-score');
+  btn.textContent = '✓ Saved!';
+  setTimeout(() => btn.textContent = 'Save score', 1500);
+});
 
 document.getElementById('btn-clear-all-fav').addEventListener('click',()=>{
   state.favorites=[];
