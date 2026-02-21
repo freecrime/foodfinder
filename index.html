@@ -40,11 +40,13 @@
   .navbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:rgba(9,9,9,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
   .nav-logo{font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:-.5px}
   .nav-logo span{color:var(--text-muted);font-weight:400}
-  .nav-right{display:flex;align-items:center;gap:10px}
+  .nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 
-  .btn-nav{background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font-body);font-size:13px;padding:6px 14px;border-radius:6px;cursor:pointer;transition:var(--transition);white-space:nowrap}
-  .btn-nav:hover{color:var(--text-primary);border-color:var(--border-glow)}
-  .btn-lang{background:var(--surface);border:1px solid var(--border);color:var(--text-primary);font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:1.5px;padding:6px 14px;border-radius:6px;cursor:pointer;transition:var(--transition)}
+  .btn-nav{position:relative;background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font-body);font-size:16px;width:36px;height:36px;border-radius:8px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .btn-nav:hover{color:var(--text-primary);border-color:var(--border-glow);background:var(--surface-hover)}
+  .btn-nav::after{content:attr(data-tip);position:absolute;bottom:-34px;left:50%;transform:translateX(-50%);background:#1e1e1e;border:1px solid var(--border);color:var(--text-secondary);font-size:11px;white-space:nowrap;padding:4px 8px;border-radius:5px;pointer-events:none;opacity:0;transition:opacity .15s ease;z-index:200}
+  .btn-nav:hover::after{opacity:1}
+  .btn-lang{background:var(--surface);border:1px solid var(--border);color:var(--text-primary);font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:1.5px;padding:0;width:36px;height:36px;border-radius:8px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .btn-lang:hover{background:var(--surface-hover);border-color:var(--border-glow);box-shadow:var(--glow)}
 
   /* ── MAIN ── */
@@ -259,11 +261,9 @@
   #local-section{display:none}
 
   @media(max-width:700px){
-    .navbar{padding:0 12px;height:56px}
+    .navbar{padding:0 14px;height:56px}
     .nav-logo{font-size:17px}
-    .nav-right{gap:5px}
-    .btn-nav{padding:5px 8px;font-size:11px}
-    .btn-lang{padding:5px 10px;font-size:11px}
+    .nav-right{gap:6px}
   }
   @media(max-width:600px){
     .edit-modal-header,.edit-modal-body,.edit-modal-footer{padding-left:14px;padding-right:14px}
@@ -282,9 +282,7 @@
     .modal-footer>div{width:100%;display:flex;flex-direction:column;gap:8px}
     .btn-save-recipe,.btn-close-modal,.btn-translate{width:100%;text-align:center;justify-content:center}
     .results-grid{grid-template-columns:1fr}
-    .nav-right{gap:4px}
-    .btn-nav{padding:4px 7px;font-size:11px;letter-spacing:0}
-    .btn-lang{padding:4px 8px;font-size:10px}
+    .nav-right{gap:6px}
     .local-recipe-row{flex-direction:column;align-items:flex-start}
     .local-recipe-actions{width:100%;justify-content:flex-start}
     .sort-bar{flex-direction:column;align-items:flex-start}
@@ -302,9 +300,9 @@
 <nav class="navbar">
   <div class="nav-logo">Food<span>Finder</span></div>
   <div class="nav-right">
-    <button class="btn-nav" id="btn-toggle-upload" data-i18n="nav.upload">Add Recipe</button>
-    <button class="btn-nav" id="btn-show-local" data-i18n="nav.local">My Recipes</button>
-    <button class="btn-nav" id="btn-show-favs" data-i18n="nav.favorites">Favorites</button>
+    <button class="btn-nav" id="btn-toggle-upload" data-tip="Add Recipe" title="Add Recipe">&#8679;</button>
+    <button class="btn-nav" id="btn-show-local" data-tip="My Recipes" title="My Recipes">&#9776;</button>
+    <button class="btn-nav" id="btn-show-favs" data-tip="Favorites" title="Favorites">&#9825;</button>
     <button class="btn-lang" id="btn-lang">DE</button>
   </div>
 </nav>
@@ -630,6 +628,13 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = t(el.dataset.i18nPlaceholder));
   document.getElementById('btn-lang').textContent = state.lang === 'en' ? 'DE' : 'EN';
+  // Update nav icon tooltips
+  document.getElementById('btn-toggle-upload').setAttribute('data-tip', t('nav.upload'));
+  document.getElementById('btn-toggle-upload').setAttribute('title', t('nav.upload'));
+  document.getElementById('btn-show-local').setAttribute('data-tip', t('nav.local'));
+  document.getElementById('btn-show-local').setAttribute('title', t('nav.local'));
+  document.getElementById('btn-show-favs').setAttribute('data-tip', t('nav.favorites'));
+  document.getElementById('btn-show-favs').setAttribute('title', t('nav.favorites'));
   updateTimeDisplay();
 }
 
