@@ -122,6 +122,7 @@
   .card-fav-btn:hover,.card-fav-btn.saved{color:var(--text-primary);border-color:var(--border-glow);background:rgba(255,255,255,.12)}
   .local-badge{position:absolute;top:10px;left:10px;background:rgba(9,9,9,.75);border:1px solid rgba(255,255,255,.2);border-radius:4px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;color:var(--text-secondary);backdrop-filter:blur(8px)}
   .card-tags{position:absolute;bottom:10px;left:10px;display:flex;gap:5px;flex-wrap:wrap}
+  .card-top-left{position:absolute;top:10px;left:10px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 80px)}
   .tag{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:rgba(9,9,9,.75);backdrop-filter:blur(8px);border:1px solid var(--border);color:var(--text-secondary)}
   .card-body{padding:16px;flex:1;display:flex;flex-direction:column}
   .card-title{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px;line-height:1.3;letter-spacing:-.3px}
@@ -228,6 +229,32 @@
   .ai-parsed-note{font-size:11px;color:var(--text-muted);padding:8px 12px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:7px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
   .ing-uncertain{border-style:dashed;opacity:.7}
 
+  /* ── FAVORITES FOLDERS ── */
+  .fav-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .fav-sort-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .fav-sort-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+  .fav-sort-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font-body);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;transition:var(--transition);white-space:nowrap}
+  .fav-sort-btn:hover{color:var(--text-primary);border-color:var(--border-glow)}
+  .fav-sort-btn.active{background:var(--accent-dim);border-color:rgba(255,255,255,.3);color:var(--text-primary)}
+  .folders-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+  .folder-tab{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font-body);font-size:12px;padding:5px 12px;border-radius:20px;cursor:pointer;transition:var(--transition);white-space:nowrap;user-select:none}
+  .folder-tab:hover{border-color:var(--border-glow);color:var(--text-primary)}
+  .folder-tab.active{background:var(--accent-dim);border-color:rgba(255,255,255,.3);color:var(--text-primary)}
+  .folder-tab .folder-count{font-size:10px;color:var(--text-muted);background:rgba(255,255,255,.07);border-radius:10px;padding:1px 6px;min-width:18px;text-align:center}
+  .folder-tab.active .folder-count{color:var(--text-secondary)}
+  .btn-new-folder{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px dashed rgba(255,255,255,.15);color:var(--text-muted);font-family:var(--font-body);font-size:12px;padding:5px 12px;border-radius:20px;cursor:pointer;transition:var(--transition)}
+  .btn-new-folder:hover{border-color:var(--border-glow);color:var(--text-primary)}
+  .folder-tab .folder-del{opacity:0;font-size:11px;color:var(--text-muted);margin-left:2px;transition:opacity .15s;line-height:1;padding:0 2px;background:none;border:none;cursor:pointer;color:inherit}
+  .folder-tab:hover .folder-del{opacity:1}
+  .folder-del:hover{color:#ff6b6b!important}
+  .card-folder-btn{display:inline-flex;align-items:center;background:rgba(9,9,9,.75);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);font-size:10px;font-family:var(--font-body);padding:3px 8px;cursor:pointer;transition:var(--transition);backdrop-filter:blur(8px);z-index:3;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card-folder-btn:hover,.card-folder-btn.assigned{color:var(--text-secondary);border-color:rgba(255,255,255,.18)}
+  .folder-picker{position:fixed;z-index:9999;background:#161616;border:1px solid var(--border-glow);border-radius:10px;padding:6px;min-width:170px;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:fadeIn .12s ease}
+  .folder-picker-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;font-size:13px;color:var(--text-secondary);cursor:pointer;transition:background .12s;white-space:nowrap}
+  .folder-picker-item:hover{background:var(--surface-hover);color:var(--text-primary)}
+  .folder-picker-item.current{color:var(--text-primary)}
+  .folder-picker-divider{height:1px;background:var(--border);margin:4px 0}
+
   /* ── EDIT MODAL ── */
   .edit-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);display:flex;align-items:flex-start;justify-content:center;padding:20px 16px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity var(--transition)}
   .edit-overlay.open{opacity:1;pointer-events:all}
@@ -258,6 +285,15 @@
   .btn-edit-cancel{background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font-body);font-size:13px;padding:10px 18px;border-radius:8px;cursor:pointer;transition:var(--transition)}
   .btn-edit-cancel:hover{color:var(--text-primary);border-color:var(--border-glow)}
   .btn-tiny.edit-btn:hover{color:#7eb8ff;border-color:rgba(100,160,255,.35)}
+  #btn-modal-edit:hover{color:var(--text-primary);border-color:var(--border-glow);background:var(--surface-hover)}
+  .edit-img-upload{border:1px dashed rgba(255,255,255,.18);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:var(--transition);position:relative;background:var(--surface)}
+  .edit-img-upload:hover{border-color:rgba(255,255,255,.35);background:var(--surface-hover)}
+  .edit-img-preview{width:100%;height:160px;object-fit:cover;display:block;border-radius:var(--radius)}
+  .edit-img-placeholder{height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);font-size:13px}
+  .edit-img-placeholder span{font-size:28px}
+  .edit-img-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .edit-img-remove{position:absolute;top:8px;right:8px;background:rgba(9,9,9,.8);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-size:11px;padding:3px 8px;cursor:pointer;backdrop-filter:blur(8px);transition:var(--transition)}
+  .edit-img-remove:hover{color:#ff6b6b;border-color:rgba(255,100,100,.3)}
   #local-section{display:none}
 
   @media(max-width:700px){
@@ -397,6 +433,18 @@
       <h2 class="section-title" data-i18n="fav.title">Saved Recipes</h2>
       <button class="btn-secondary" id="btn-clear-all-fav" data-i18n="fav.clearAll">Clear All</button>
     </div>
+    <!-- Sort + folder controls -->
+    <div class="fav-controls">
+      <div class="fav-sort-group">
+        <span class="fav-sort-label">Sort:</span>
+        <button class="fav-sort-btn active" data-fsort="added">Date added</button>
+        <button class="fav-sort-btn" data-fsort="alpha">A–Z</button>
+        <button class="fav-sort-btn" data-fsort="score">Score</button>
+        <button class="fav-sort-btn" data-fsort="time">Time</button>
+      </div>
+    </div>
+    <!-- Folder tabs -->
+    <div class="folders-bar" id="folders-bar"></div>
     <div class="results-grid" id="favorites-grid"></div>
   </div>
 
@@ -433,9 +481,10 @@
 <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal" id="modal">
     <div id="modal-img-wrap"></div>
-    <div class="modal-header">
+    <div class="modal-header" style="position:relative">
       <h2 class="modal-title" id="modal-title"></h2>
       <div class="modal-meta" id="modal-meta"></div>
+      <button id="btn-modal-edit" title="Edit recipe" style="display:none;position:absolute;top:16px;right:16px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-secondary);font-size:13px;width:34px;height:34px;cursor:pointer;transition:var(--transition);align-items:center;justify-content:center;font-family:var(--font-body)">✎</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
     <div class="translate-notice" id="translate-notice" data-i18n="modal.translatedNotice">Content automatically translated to German.</div>
@@ -603,11 +652,15 @@ const LANG = {
 // ============================================================
 let state = {
   lang: localStorage.getItem('ff-lang') || 'en',
-  recipes: [],          // current search results (API)
+  recipes: [],
   filteredRecipes: [],
   favorites: JSON.parse(localStorage.getItem('ff-favorites') || '[]'),
   localRecipes: JSON.parse(localStorage.getItem('ff-local-recipes') || '[]'),
   scores: JSON.parse(localStorage.getItem('ff-scores') || '{}'),
+  folders: JSON.parse(localStorage.getItem('ff-folders') || '[]'),         // [{id, name}]
+  recipeFolder: JSON.parse(localStorage.getItem('ff-recipe-folder') || '{}'), // {recipeId: folderId}
+  activeFolder: 'all',  // 'all' | folderId
+  favSort: 'added',
   currentRecipe: null,
   loading: false,
   sortBy: 'relevance',
@@ -777,28 +830,25 @@ function searchLocalRecipes(terms) {
 }
 
 // ============================================================
-//  TRANSLATION
+//  TRANSLATION — uses MyMemory (free, no API key needed)
 // ============================================================
-async function translateGoogle(text, target) {
-  const res=await fetch(`https://translation.googleapis.com/language/translate/v2?key=${CONFIG.GOOGLE_TRANSLATE_KEY}`,{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({q:text, target, format:'text'})
-  });
-  return (await res.json()).data.translations[0].translatedText;
-}
-
-async function translateLibre(text, target) {
-  const body={q:text, source:'en', target, format:'text'};
-  if(CONFIG.LIBRE_TRANSLATE_KEY) body.api_key=CONFIG.LIBRE_TRANSLATE_KEY;
-  const res=await fetch(CONFIG.LIBRE_TRANSLATE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  return (await res.json()).translatedText||text;
+async function translateWithMyMemory(text, targetLang) {
+  // MyMemory: source auto-detected, target e.g. 'de' or 'en'
+  if (!text || !text.trim()) return text;
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.slice(0,500))}&langpair=auto|${targetLang}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('MyMemory error');
+  const data = await res.json();
+  if (data.responseStatus === 200 && data.responseData?.translatedText) {
+    return data.responseData.translatedText;
+  }
+  throw new Error('MyMemory: ' + (data.responseDetails || 'unknown error'));
 }
 
 async function translateText(text, target) {
-  if(!text) return text;
-  if(CONFIG.TRANSLATE_API==='google'&&CONFIG.GOOGLE_TRANSLATE_KEY) return translateGoogle(text, target);
-  if(CONFIG.TRANSLATE_API==='libre') return translateLibre(text, target);
-  return text;
+  if (!text) return text;
+  // target: 'de' or 'en'
+  return translateWithMyMemory(text, target);
 }
 
 // ============================================================
@@ -829,8 +879,8 @@ function renderResults(recipes, targetId, isFav=false) {
   }
   grid.innerHTML = recipes.map(r=>buildCard(r,isFav)).join('');
   grid.querySelectorAll('.recipe-card').forEach(card => {
-    card.addEventListener('click', e => { if(e.target.closest('.card-fav-btn')) return; openModal(card.dataset.id); });
-    card.addEventListener('keydown', e => { if((e.key==='Enter'||e.key===' ')&&!e.target.closest('.card-fav-btn')) openModal(card.dataset.id); });
+    card.addEventListener('click', e => { if(e.target.closest('.card-fav-btn')||e.target.closest('.card-folder-btn')) return; openModal(card.dataset.id); });
+    card.addEventListener('keydown', e => { if((e.key==='Enter'||e.key===' ')&&!e.target.closest('.card-fav-btn')&&!e.target.closest('.card-folder-btn')) openModal(card.dataset.id); });
   });
   grid.querySelectorAll('.card-fav-btn').forEach(btn => btn.addEventListener('click', ()=>toggleFavorite(btn.dataset.id)));
 }
@@ -844,15 +894,22 @@ function buildCard(recipe, isFav=false) {
     : recipe.pdfImageDataUrl
       ? `<img class="card-img" src="${recipe.pdfImageDataUrl}" alt="${recipe.title}" loading="lazy" style="object-position:top">`
       : `<div class="card-placeholder">${recipe.title.charAt(0)}</div>`;
-  const localBadge = recipe.isLocal ? `<span class="local-badge">${t('local.badge')}</span>` : '';
+  const localBadge = recipe.isLocal ? `<span class="local-badge" style="position:static;display:inline-block">${t('local.badge')}</span>` : '';
   const score = state.scores[String(recipe.id)];
   const scoreBadge = score !== undefined ? `<span class="card-score">${score}/100</span>` : '';
+  // Folder button only on favorite cards — shown top-left beside local badge
+  let folderBtn = '';
+  if (isFav) {
+    const assignedFid = state.recipeFolder[String(recipe.id)];
+    const folder = assignedFid ? state.folders.find(f=>f.id===assignedFid) : null;
+    folderBtn = `<button class="card-folder-btn${folder?' assigned':''}" data-id="${recipe.id}">${folder ? '📁 '+escHtmlSimple(folder.name) : '📁 Folder'}</button>`;
+  }
   return `
   <article class="recipe-card${recipe.isLocal?' local-card':''}" data-id="${recipe.id}" tabindex="0" role="button" aria-label="${recipe.title}">
     <div class="card-img-wrap">
       ${imgEl}
       <button class="card-fav-btn${isSaved?' saved':''}" data-id="${recipe.id}">${favLabel}</button>
-      ${localBadge}
+      <div class="card-top-left">${localBadge}${folderBtn}</div>
       ${tags?`<div class="card-tags">${tags}</div>`:''}
       ${scoreBadge}
     </div>
@@ -942,6 +999,16 @@ async function openModal(id) {
   translateBtn.classList.remove('translating');
   translateLabel.textContent = isLikelyGerman ? t('modal.translate') : t('modal.translateDe');
 
+  // Show/hide edit button (only for local recipes)
+  const modalEditBtn = document.getElementById('btn-modal-edit');
+  if (recipe.isLocal) {
+    modalEditBtn.style.display = 'flex';
+    modalEditBtn.onclick = () => { closeModal(); openEditModal(recipe.id); };
+  } else {
+    modalEditBtn.style.display = 'none';
+    modalEditBtn.onclick = null;
+  }
+
   let metaHTML='';
   if(recipe.time) metaHTML+=`<div class="modal-meta-item"><span>${t('meta.time')}</span><strong>${recipe.time} min</strong></div>`;
   if(recipe.category) metaHTML+=`<div class="modal-meta-item"><span>${t('meta.category')}</span><strong>${recipe.category}</strong></div>`;
@@ -1005,60 +1072,29 @@ async function handleTranslateClick() {
   label.textContent = t('modal.translating');
 
   const isLikelyGerman = recipe.isLocal || recipe.source === 'local';
-  const targetLang = isLikelyGerman ? 'English' : 'German';
-  const sourceLang = isLikelyGerman ? 'German' : 'English';
+  const targetLang = isLikelyGerman ? 'en' : 'de';
 
   try {
-    const ingText = _modalOriginalIngredients.map(i=>i.text).join('\n');
+    // Translate ingredients (batch as one text)
+    const ingText = _modalOriginalIngredients.map(i => i.text).join('\n');
     const instrText = _modalOriginalInstructions;
 
-    const prompt = `Translate this recipe from ${sourceLang} to ${targetLang}. Return ONLY in this exact format with the section headers:
+    const [translatedIngText, translatedInstr] = await Promise.all([
+      ingText ? translateWithMyMemory(ingText, targetLang) : Promise.resolve(''),
+      instrText ? translateWithMyMemory(instrText.slice(0, 500), targetLang) : Promise.resolve('')
+    ]);
 
-INGREDIENTS:
-[translated ingredients, one per line]
-
-INSTRUCTIONS:
-[translated instructions]
-
-INGREDIENTS TO TRANSLATE:
-${ingText}
-
-INSTRUCTIONS TO TRANSLATE:
-${instrText}`;
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    if (!response.ok) throw new Error('API error');
-    const data = await response.json();
-    const translated = data.content.map(c=>c.text||'').join('');
-
-    const ingMatch = translated.match(/INGREDIENTS:\s*([\s\S]+?)(?=\n\nINSTRUCTIONS:|$)/i);
-    const instMatch = translated.match(/INSTRUCTIONS:\s*([\s\S]+?)$/i);
-
-    const translatedIngredients = ingMatch
-      ? ingMatch[1].trim().split('\n').filter(Boolean).map(l=>({text:l.replace(/^[-•*]\s*/,'').trim()})).filter(l=>l.text)
+    const translatedIngredients = translatedIngText
+      ? translatedIngText.split('\n').filter(Boolean).map(l => ({ text: l.trim() }))
       : _modalOriginalIngredients;
-    const translatedInstructions = instMatch ? instMatch[1].trim() : _modalOriginalInstructions;
 
     _modalTranslated = true;
-    renderModalContent(translatedIngredients, translatedInstructions, true);
-    label.textContent = '↩ ' + (targetLang === 'English' ? 'Show original (DE)' : 'Original anzeigen (EN)');
+    renderModalContent(translatedIngredients, translatedInstr, true);
+    label.textContent = '↩ ' + (targetLang === 'en' ? 'Show original (DE)' : 'Original anzeigen (EN)');
 
   } catch (e) {
     console.error('Translation failed:', e);
-    label.textContent = '⚠ Translation unavailable';
+    label.textContent = '⚠ Translation failed, try again';
   }
 
   btn.disabled = false;
@@ -1132,9 +1168,179 @@ function refreshFavButtons(id) {
 
 function renderFavorites() {
   const section = document.getElementById('favorites-section');
-  if(!state.favorites.length){ section.style.display='none'; return; }
-  section.style.display='block';
-  renderResults(state.favorites,'favorites-grid',true);
+  if (!state.favorites.length) { section.style.display='none'; return; }
+  section.style.display = 'block';
+  renderFolderTabs();
+  renderFavGrid();
+}
+
+function saveFolderData() {
+  localStorage.setItem('ff-folders', JSON.stringify(state.folders));
+  localStorage.setItem('ff-recipe-folder', JSON.stringify(state.recipeFolder));
+}
+
+function getFavsSorted(favs) {
+  const arr = [...favs];
+  if (state.favSort === 'alpha') arr.sort((a,b) => a.title.localeCompare(b.title));
+  else if (state.favSort === 'score') arr.sort((a,b) => (state.scores[String(b.id)]??-1) - (state.scores[String(a.id)]??-1));
+  else if (state.favSort === 'time') arr.sort((a,b) => (a.time||999) - (b.time||999));
+  // 'added' = default insertion order (already newest-first from unshift)
+  return arr;
+}
+
+function getFilteredFavs() {
+  if (state.activeFolder === 'all') return getFavsSorted(state.favorites);
+  return getFavsSorted(state.favorites.filter(f => state.recipeFolder[String(f.id)] === state.activeFolder));
+}
+
+function renderFolderTabs() {
+  const bar = document.getElementById('folders-bar');
+  const allCount = state.favorites.length;
+
+  // Count per folder
+  const counts = {};
+  state.folders.forEach(f => counts[f.id] = 0);
+  Object.values(state.recipeFolder).forEach(fid => { if (counts[fid] !== undefined) counts[fid]++; });
+
+  const tabsHTML = state.folders.map(f => `
+    <button class="folder-tab${state.activeFolder===f.id?' active':''}" data-fid="${f.id}">
+      📁 ${escHtmlSimple(f.name)}
+      <span class="folder-count">${counts[f.id]||0}</span>
+      <button class="folder-del" data-fid="${f.id}" title="Delete folder">✕</button>
+    </button>`).join('');
+
+  bar.innerHTML = `
+    <button class="folder-tab${state.activeFolder==='all'?' active':''}" data-fid="all">
+      All <span class="folder-count">${allCount}</span>
+    </button>
+    ${tabsHTML}
+    <button class="btn-new-folder" id="btn-new-folder">+ New folder</button>`;
+
+  bar.querySelectorAll('.folder-tab').forEach(tab => {
+    tab.addEventListener('click', e => {
+      if (e.target.classList.contains('folder-del')) return;
+      state.activeFolder = tab.dataset.fid;
+      renderFolderTabs();
+      renderFavGrid();
+    });
+  });
+
+  bar.querySelectorAll('.folder-del').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      deleteFolder(btn.dataset.fid);
+    });
+  });
+
+  document.getElementById('btn-new-folder').addEventListener('click', promptNewFolder);
+}
+
+function renderFavGrid() {
+  const favs = getFilteredFavs();
+  const grid = document.getElementById('favorites-grid');
+  if (!favs.length) {
+    grid.innerHTML = `<div class="state-msg" style="grid-column:1/-1"><h3>${state.activeFolder==='all'?t('state.noFavs'):'No recipes in this folder'}</h3><p>${state.activeFolder==='all'?t('state.noFavsSub'):'Assign favorites to this folder using the folder button on each card.'}</p></div>`;
+    return;
+  }
+  grid.innerHTML = favs.map(r => buildCard(r, true)).join('');
+  grid.querySelectorAll('.recipe-card').forEach(card => {
+    card.addEventListener('click', e => { if (e.target.closest('.card-fav-btn')||e.target.closest('.card-folder-btn')) return; openModal(card.dataset.id); });
+    card.addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ')&&!e.target.closest('.card-fav-btn')&&!e.target.closest('.card-folder-btn')) openModal(card.dataset.id); });
+  });
+  grid.querySelectorAll('.card-fav-btn').forEach(btn => btn.addEventListener('click', ()=>toggleFavorite(btn.dataset.id)));
+  grid.querySelectorAll('.card-folder-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); openFolderPicker(btn.dataset.id, btn); }));
+}
+
+function promptNewFolder() {
+  const name = window.prompt('Folder name:');
+  if (!name || !name.trim()) return;
+  const id = 'folder_' + Date.now();
+  state.folders.push({ id, name: name.trim() });
+  state.activeFolder = id;
+  saveFolderData();
+  renderFolderTabs();
+  renderFavGrid();
+}
+
+function deleteFolder(fid) {
+  const folder = state.folders.find(f => f.id === fid);
+  const name = folder ? folder.name : 'this folder';
+  if (!confirm(`Delete folder "${name}"? Recipes won't be deleted, just removed from this folder.`)) return;
+  state.folders = state.folders.filter(f => f.id !== fid);
+  // Unassign recipes from this folder
+  Object.keys(state.recipeFolder).forEach(rid => { if (state.recipeFolder[rid] === fid) delete state.recipeFolder[rid]; });
+  if (state.activeFolder === fid) state.activeFolder = 'all';
+  saveFolderData();
+  renderFolderTabs();
+  renderFavGrid();
+}
+
+// ── Folder assignment — simple inline dropdown ──
+function openFolderPicker(recipeId, anchor) {
+  // If a select is already open for this recipe, close it
+  const existing = document.getElementById('folder-select-' + recipeId);
+  if (existing) { existing.remove(); return; }
+  // Remove any other open pickers
+  document.querySelectorAll('.folder-inline-select').forEach(s => s.remove());
+
+  const currentFid = state.recipeFolder[String(recipeId)];
+
+  const select = document.createElement('select');
+  select.id = 'folder-select-' + recipeId;
+  select.className = 'folder-inline-select';
+  select.style.cssText = 'position:absolute;z-index:9999;background:#161616;border:1px solid rgba(255,255,255,.25);border-radius:8px;color:#f0f0f0;font-size:13px;padding:6px 10px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.7);outline:none;min-width:160px';
+
+  const options = [
+    { value: '', label: '— No folder —' },
+    ...state.folders.map(f => ({ value: f.id, label: '📁 ' + f.name })),
+    { value: '__new__', label: '+ New folder…' },
+  ];
+  options.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o.value;
+    opt.textContent = o.label;
+    if (o.value === currentFid) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  // Position near the anchor button
+  const rect = anchor.getBoundingClientRect();
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  select.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
+  select.style.top = (rect.bottom + scrollTop + 4) + 'px';
+  document.body.appendChild(select);
+  select.focus();
+
+  select.addEventListener('change', () => {
+    const fid = select.value;
+    if (fid === '__new__') {
+      select.remove();
+      const name = window.prompt('New folder name:');
+      if (!name || !name.trim()) return;
+      const newId = 'folder_' + Date.now();
+      state.folders.push({ id: newId, name: name.trim() });
+      state.recipeFolder[String(recipeId)] = newId;
+    } else if (fid === '') {
+      delete state.recipeFolder[String(recipeId)];
+      select.remove();
+    } else {
+      state.recipeFolder[String(recipeId)] = fid;
+      select.remove();
+    }
+    saveFolderData();
+    renderFolderTabs();
+    renderFavGrid();
+  });
+
+  select.addEventListener('blur', () => setTimeout(() => select.remove(), 150));
+}
+
+function closeFolderPicker() {
+  document.querySelectorAll('.folder-inline-select').forEach(s => s.remove());
+}
+
+function escHtmlSimple(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ============================================================
@@ -1802,6 +2008,9 @@ function renderLocalRecipesList() {
 }
 
 function deleteLocalRecipe(id) {
+  const recipe = state.localRecipes.find(r => r.id === id);
+  const name = recipe ? recipe.title : 'this recipe';
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
   state.localRecipes = state.localRecipes.filter(r => r.id !== id);
   state.favorites = state.favorites.filter(f => f.id !== id);
   localStorage.setItem('ff-favorites', JSON.stringify(state.favorites));
@@ -1823,7 +2032,20 @@ function openEditModal(id) {
   const ingredients = (recipe.ingredients || []).map(i => i.text);
   const steps = (recipe.instructions || '').split('\n').filter(s => s.trim().length > 0);
 
+  const currentImg = recipe.pdfImageDataUrl || recipe.image || null;
+
   document.getElementById('edit-modal-body').innerHTML = `
+    <div>
+      <label class="edit-field-label">Photo</label>
+      <div class="edit-img-upload" id="edit-img-wrap">
+        <input type="file" class="edit-img-input" id="edit-img-input" accept="image/*">
+        ${currentImg
+          ? `<img class="edit-img-preview" id="edit-img-preview" src="${currentImg}" alt="Recipe photo">
+             <button type="button" class="edit-img-remove" id="edit-img-remove">✕ Remove</button>`
+          : `<div class="edit-img-placeholder"><span>🖼</span><p>Click to add a photo</p></div>`
+        }
+      </div>
+    </div>
     <div>
       <label class="edit-field-label">Recipe Name</label>
       <input class="edit-input" id="edit-title" type="text" value="${escHtml(recipe.title)}">
@@ -1869,6 +2091,25 @@ function editStepRow(value, idx) {
 }
 
 function bindEditListeners() {
+  // Image upload
+  const imgInput = document.getElementById('edit-img-input');
+  const imgWrap = document.getElementById('edit-img-wrap');
+  imgInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      imgWrap.innerHTML = `
+        <input type="file" class="edit-img-input" id="edit-img-input" accept="image/*">
+        <img class="edit-img-preview" id="edit-img-preview" src="${dataUrl}" alt="Recipe photo">
+        <button type="button" class="edit-img-remove" id="edit-img-remove">✕ Remove</button>`;
+      bindImgListeners();
+    };
+    reader.readAsDataURL(file);
+  });
+  bindImgListeners();
+
   // Remove ingredient rows
   document.getElementById('edit-ing-list').addEventListener('click', e => {
     const btn = e.target.closest('.btn-remove-row');
@@ -1901,6 +2142,37 @@ function bindEditListeners() {
   });
 }
 
+function bindImgListeners() {
+  const imgInput = document.getElementById('edit-img-input');
+  const imgWrap = document.getElementById('edit-img-wrap');
+  if (imgInput) {
+    imgInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const dataUrl = ev.target.result;
+        imgWrap.innerHTML = `
+          <input type="file" class="edit-img-input" id="edit-img-input" accept="image/*">
+          <img class="edit-img-preview" id="edit-img-preview" src="${dataUrl}" alt="Recipe photo">
+          <button type="button" class="edit-img-remove" id="edit-img-remove">✕ Remove</button>`;
+        bindImgListeners();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  const removeBtn = document.getElementById('edit-img-remove');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      imgWrap.innerHTML = `
+        <input type="file" class="edit-img-input" id="edit-img-input" accept="image/*">
+        <div class="edit-img-placeholder"><span>🖼</span><p>Click to add a photo</p></div>`;
+      bindImgListeners();
+    });
+  }
+}
+
 function renumberSteps() {
   document.querySelectorAll('#edit-step-list .edit-step-num').forEach((el, i) => el.textContent = i + 1);
 }
@@ -1922,11 +2194,16 @@ function saveEditedRecipe() {
   const steps = [...document.querySelectorAll('#edit-step-list .edit-step-ta')]
     .map(ta => ta.value.trim()).filter(Boolean);
 
+  // Get image — either the preview src (new upload or existing) or null if removed
+  const imgPreview = document.getElementById('edit-img-preview');
+  const newImg = imgPreview ? imgPreview.src : null;
+
   state.localRecipes[idx] = {
     ...state.localRecipes[idx],
     title,
     ingredients,
     instructions: steps.join('\n'),
+    pdfImageDataUrl: newImg || null,
     _stats: { ingCount: ingredients.length, stepCount: steps.length },
     _editedAt: Date.now(),
   };
@@ -1934,7 +2211,7 @@ function saveEditedRecipe() {
   // Also update in favorites if saved there
   const favIdx = state.favorites.findIndex(f => f.id === _editingId);
   if (favIdx > -1) {
-    state.favorites[favIdx] = { ...state.favorites[favIdx], title, ingredients, instructions: steps.join('\n') };
+    state.favorites[favIdx] = { ...state.favorites[favIdx], title, ingredients, instructions: steps.join('\n'), pdfImageDataUrl: newImg || null };
     localStorage.setItem('ff-favorites', JSON.stringify(state.favorites));
   }
 
@@ -2142,11 +2419,21 @@ document.getElementById('btn-save-score').addEventListener('click', () => {
 });
 
 document.getElementById('btn-clear-all-fav').addEventListener('click',()=>{
+  if (!confirm('Clear all saved recipes? This cannot be undone.')) return;
   state.favorites=[];
+  state.recipeFolder={};
   localStorage.setItem('ff-favorites',JSON.stringify([]));
+  saveFolderData();
   document.getElementById('favorites-section').style.display='none';
   document.querySelectorAll('.card-fav-btn').forEach(btn=>{ btn.textContent=t('fav.save'); btn.classList.remove('saved'); });
 });
+
+// Fav sort buttons
+document.querySelectorAll('.fav-sort-btn').forEach(btn => btn.addEventListener('click', () => {
+  state.favSort = btn.dataset.fsort;
+  document.querySelectorAll('.fav-sort-btn').forEach(b => b.classList.toggle('active', b.dataset.fsort === state.favSort));
+  renderFavGrid();
+}));
 
 // PDF file input
 document.getElementById('pdf-file-input').addEventListener('change',e=>{
