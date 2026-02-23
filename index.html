@@ -340,8 +340,54 @@
     <button class="btn-nav" id="btn-show-local" data-tip="My Recipes" title="My Recipes">&#9776;</button>
     <button class="btn-nav" id="btn-show-favs" data-tip="Favorites" title="Favorites">&#9825;</button>
     <button class="btn-lang" id="btn-lang">DE</button>
+    <button class="btn-nav" id="btn-changelog" data-tip="Changelog" title="Changelog" style="font-size:13px;font-weight:700">!</button>
   </div>
 </nav>
+
+<!-- CHANGELOG MODAL -->
+<div id="changelog-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px 16px">
+  <div style="background:#111;border:1px solid rgba(255,255,255,.12);border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.08)">
+      <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.4px">Changelog</span>
+      <button id="btn-close-changelog" style="background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#888;font-size:14px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s ease">✕</button>
+    </div>
+    <div style="padding:20px 22px;max-height:420px;overflow-y:auto">
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800">v1.2</span>
+          <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#555;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:2px 8px">Latest</span>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Share recipes via copy-paste code — works across any device</li>
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Import recipes from share codes in the upload panel</li>
+        </ul>
+      </div>
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800">v1.1</span>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Added folder system for organizing saved recipes</li>
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Added confirmation dialog when deleting recipes</li>
+        </ul>
+      </div>
+      <div style="margin-bottom:20px">
+        <div style="margin-bottom:10px">
+          <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800">v1.0</span>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Initial release</li>
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Ingredient-based recipe search via MealDB API</li>
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Local recipe import from PDF with AI parsing</li>
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Save recipes to favorites</li>
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Rate recipes with a score</li>
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> German / English interface &amp; translation</li>
+          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Filter by diet, difficulty, and cook time</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="main-container">
 
@@ -373,7 +419,38 @@
       <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
     </div>
     <div class="local-recipes-list" id="local-recipes-list"></div>
+
+    <!-- IMPORT FROM CODE -->
+    <div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--border)">
+      <p style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px">Import from Code</p>
+      <div style="display:flex;gap:10px;align-items:flex-end">
+        <textarea id="import-code-input" placeholder="Paste a recipe share code here..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-family:var(--font-body);font-size:12px;padding:10px 14px;outline:none;resize:vertical;min-height:64px;line-height:1.5;transition:border-color .22s"></textarea>
+        <button id="btn-import-code" style="background:var(--text-primary);color:var(--bg);border:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:10px 18px;cursor:pointer;white-space:nowrap;height:42px">Import</button>
+      </div>
+      <p id="import-status" style="font-size:12px;margin-top:8px;display:none"></p>
+    </div>
   </section>
+
+  <!-- SHARE RECIPE MODAL -->
+  <div id="share-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px 16px">
+    <div style="background:#111;border:1px solid rgba(255,255,255,.12);border-radius:16px;width:100%;max-width:520px;box-shadow:0 0 40px rgba(0,0,0,.7)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.08)">
+        <div>
+          <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.4px">Share Recipe</span>
+          <p id="share-recipe-name" style="font-size:12px;color:#555;margin-top:2px"></p>
+        </div>
+        <button id="btn-close-share" style="background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#888;font-size:14px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#x2715;</button>
+      </div>
+      <div style="padding:20px 22px">
+        <p style="font-size:12px;color:#666;margin-bottom:12px;line-height:1.6">Copy this code and paste it into FoodFinder on any device to import the recipe. The code contains all recipe data except the photo.</p>
+        <textarea id="share-code-output" readonly style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#ccc;font-family:monospace;font-size:11px;padding:12px;outline:none;resize:none;line-height:1.5;height:130px;word-break:break-all;display:block"></textarea>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button id="btn-copy-share-code" style="flex:1;background:#f0f0f0;color:#090909;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:11px;cursor:pointer">Copy Code</button>
+          <button id="btn-close-share-2" style="background:transparent;border:1px solid rgba(255,255,255,.1);color:#888;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;padding:11px 20px;cursor:pointer">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- FILTERS -->
   <section class="filter-section">
@@ -487,7 +564,7 @@
       <button id="btn-modal-edit" title="Edit recipe" style="display:none;position:absolute;top:16px;right:16px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-secondary);font-size:13px;width:34px;height:34px;cursor:pointer;transition:var(--transition);align-items:center;justify-content:center;font-family:var(--font-body)">✎</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
-    <div class="translate-notice" id="translate-notice" data-i18n="modal.translatedNotice">Content automatically translated to German.</div>
+    <div class="translate-notice" id="translate-notice">Content automatically translated.</div>
     <div class="modal-footer">
       <button class="btn-close-modal" id="btn-close-modal" data-i18n="modal.close">Close</button>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -688,6 +765,8 @@ function applyI18n() {
   document.getElementById('btn-show-local').setAttribute('title', t('nav.local'));
   document.getElementById('btn-show-favs').setAttribute('data-tip', t('nav.favorites'));
   document.getElementById('btn-show-favs').setAttribute('title', t('nav.favorites'));
+  document.getElementById('btn-changelog').setAttribute('data-tip', state.lang === 'de' ? 'Änderungsprotokoll' : 'Changelog');
+  document.getElementById('btn-changelog').setAttribute('title', state.lang === 'de' ? 'Änderungsprotokoll' : 'Changelog');
   updateTimeDisplay();
 }
 
@@ -1091,6 +1170,11 @@ async function handleTranslateClick() {
     _modalTranslated = true;
     renderModalContent(translatedIngredients, translatedInstr, true);
     label.textContent = '↩ ' + (targetLang === 'en' ? 'Show original (DE)' : 'Original anzeigen (EN)');
+    const notice = document.getElementById('translate-notice');
+    notice.textContent = targetLang === 'en'
+      ? (state.lang === 'de' ? 'Ins Englische übersetzt.' : 'Translated to English.')
+      : (state.lang === 'de' ? 'Ins Deutsche übersetzt.' : 'Translated to German.');
+    notice.classList.add('visible');
 
   } catch (e) {
     console.error('Translation failed:', e);
@@ -1996,21 +2080,104 @@ function renderLocalRecipesList() {
         </div>
         <div class="local-recipe-actions">
           <button class="btn-tiny view-local" data-id="${r.id}">${t('upload.view')}</button>
-          <button class="btn-tiny edit-btn edit-local" data-id="${r.id}" title="Edit recipe">✏</button>
+          <button class="btn-tiny edit-btn edit-local" data-id="${r.id}" title="Edit recipe">&#x270F;</button>
+          <button class="btn-tiny share-local" data-id="${r.id}" title="Share recipe">&#x2197;</button>
           <button class="btn-tiny danger delete-local" data-id="${r.id}">${t('upload.delete')}</button>
         </div>
       </div>`;
     }).join('');
     container.querySelectorAll('.view-local').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.id)));
     container.querySelectorAll('.edit-local').forEach(btn => btn.addEventListener('click', () => openEditModal(btn.dataset.id)));
+    container.querySelectorAll('.share-local').forEach(btn => btn.addEventListener('click', () => openShareModal(btn.dataset.id)));
     container.querySelectorAll('.delete-local').forEach(btn => btn.addEventListener('click', () => deleteLocalRecipe(btn.dataset.id)));
   });
+}
+
+// ============================================================
+//  SHARE / IMPORT RECIPE
+// ============================================================
+
+function openShareModal(id) {
+  const recipe = state.localRecipes.find(r => r.id === id);
+  if (!recipe) return;
+
+  // Build a clean export object — strip image data and internal IDs
+  const exportObj = {
+    _ff: '1', // format marker
+    title: recipe.title,
+    ingredients: (recipe.ingredients || []).map(i => i.text || i),
+    instructions: recipe.instructions || '',
+    category: recipe.category || '',
+    area: recipe.area || '',
+    time: recipe.time || null,
+    servings: recipe.servings || null,
+    calories: recipe.calories || null,
+    difficulty: recipe.difficulty || '',
+    tags: recipe.tags || [],
+  };
+
+  const json = JSON.stringify(exportObj);
+  // btoa with Unicode support
+  const code = 'FF1:' + btoa(unescape(encodeURIComponent(json)));
+
+  document.getElementById('share-recipe-name').textContent = recipe.title;
+  document.getElementById('share-code-output').value = code;
+  document.getElementById('share-overlay').style.display = 'flex';
+}
+
+function importRecipeFromCode(code) {
+  code = code.trim();
+  if (!code.startsWith('FF1:')) {
+    return { ok: false, msg: state.lang === 'de' ? 'Ungültiger Code.' : 'Invalid code.' };
+  }
+  try {
+    const json = decodeURIComponent(escape(atob(code.slice(4))));
+    const obj = JSON.parse(json);
+    if (!obj._ff || !obj.title) throw new Error('Bad format');
+
+    // Check for duplicate
+    const exists = state.localRecipes.some(r => r.title === obj.title && r.source === 'shared');
+    if (exists) {
+      return { ok: false, msg: state.lang === 'de' ? `"${obj.title}" ist bereits vorhanden.` : `"${obj.title}" already exists.` };
+    }
+
+    const recipe = {
+      id: 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2),
+      title: obj.title,
+      image: null,
+      pdfImageDataUrl: null,
+      category: obj.category || '',
+      area: obj.area || '',
+      time: obj.time || null,
+      servings: obj.servings || null,
+      calories: obj.calories || null,
+      difficulty: obj.difficulty || '',
+      tags: obj.tags || [],
+      ingredients: (obj.ingredients || []).map(t => ({ text: t })),
+      instructions: obj.instructions || '',
+      source: 'shared',
+      isLocal: true,
+      addedAt: Date.now(),
+      filename: 'shared',
+      _stats: { ingCount: obj.ingredients.length, stepCount: (obj.instructions || '').split('\n').filter(s => s.trim().length > 5).length },
+    };
+
+    state.localRecipes.unshift(recipe);
+    saveLocalRecipes();
+    renderLocalRecipesList();
+    return { ok: true, msg: state.lang === 'de' ? `"${recipe.title}" importiert!` : `"${recipe.title}" imported!` };
+  } catch(e) {
+    return { ok: false, msg: state.lang === 'de' ? 'Fehler beim Lesen des Codes.' : 'Could not read the code.' };
+  }
 }
 
 function deleteLocalRecipe(id) {
   const recipe = state.localRecipes.find(r => r.id === id);
   const name = recipe ? recipe.title : 'this recipe';
-  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  const msg = state.lang === 'de'
+    ? `„${name}" löschen? Dies kann nicht rückgängig gemacht werden.`
+    : `Delete "${name}"? This cannot be undone.`;
+  if (!confirm(msg)) return;
   state.localRecipes = state.localRecipes.filter(r => r.id !== id);
   state.favorites = state.favorites.filter(f => f.id !== id);
   localStorage.setItem('ff-favorites', JSON.stringify(state.favorites));
@@ -2045,6 +2212,7 @@ function openEditModal(id) {
           : `<div class="edit-img-placeholder"><span>🖼</span><p>Click to add a photo</p></div>`
         }
       </div>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:6px">💡 Recommended: under 500 KB · ~800×600 px. Large images may exceed browser storage limits (localStorage ~5 MB total) and fail to save.</p>
     </div>
     <div>
       <label class="edit-field-label">Recipe Name</label>
@@ -2340,6 +2508,51 @@ document.getElementById('btn-clear').addEventListener('click',clearSearch);
 document.getElementById('search-input').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
 document.getElementById('btn-lang').addEventListener('click',toggleLang);
 
+// Share modal
+document.getElementById('btn-close-share').addEventListener('click', () => { document.getElementById('share-overlay').style.display = 'none'; });
+document.getElementById('btn-close-share-2').addEventListener('click', () => { document.getElementById('share-overlay').style.display = 'none'; });
+document.getElementById('share-overlay').addEventListener('click', e => { if (e.target === document.getElementById('share-overlay')) document.getElementById('share-overlay').style.display = 'none'; });
+document.getElementById('btn-copy-share-code').addEventListener('click', () => {
+  const ta = document.getElementById('share-code-output');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const btn = document.getElementById('btn-copy-share-code');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy Code', 2000);
+  }).catch(() => {
+    document.execCommand('copy');
+    const btn = document.getElementById('btn-copy-share-code');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy Code', 2000);
+  });
+});
+
+// Import code
+document.getElementById('btn-import-code').addEventListener('click', () => {
+  const code = document.getElementById('import-code-input').value;
+  const status = document.getElementById('import-status');
+  if (!code.trim()) return;
+  const result = importRecipeFromCode(code);
+  status.style.display = 'block';
+  status.style.color = result.ok ? '#7dff9a' : '#ff7d7d';
+  status.textContent = result.ok ? '✓ ' + result.msg : '✕ ' + result.msg;
+  if (result.ok) document.getElementById('import-code-input').value = '';
+  setTimeout(() => { status.style.display = 'none'; }, 4000);
+});
+
+// Changelog
+document.getElementById('btn-changelog').addEventListener('click', () => {
+  document.getElementById('changelog-overlay').style.display = 'flex';
+});
+document.getElementById('btn-close-changelog').addEventListener('click', () => {
+  document.getElementById('changelog-overlay').style.display = 'none';
+});
+document.getElementById('changelog-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('changelog-overlay')) {
+    document.getElementById('changelog-overlay').style.display = 'none';
+  }
+});
+
 document.getElementById('btn-show-favs').addEventListener('click',()=>{
   const section=document.getElementById('favorites-section');
   renderFavorites();
@@ -2393,7 +2606,7 @@ document.querySelectorAll('.sort-btn').forEach(btn=>btn.addEventListener('click'
 document.getElementById('btn-close-modal').addEventListener('click',closeModal);
 document.getElementById('btn-translate-modal').addEventListener('click',handleTranslateClick);
 document.getElementById('modal-overlay').addEventListener('click',e=>{ if(e.target===document.getElementById('modal-overlay')) closeModal(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeEditModal(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeEditModal(); document.getElementById('changelog-overlay').style.display='none'; document.getElementById('share-overlay').style.display='none'; } });
 
 // Edit modal
 document.getElementById('btn-edit-close').addEventListener('click', closeEditModal);
@@ -2419,7 +2632,10 @@ document.getElementById('btn-save-score').addEventListener('click', () => {
 });
 
 document.getElementById('btn-clear-all-fav').addEventListener('click',()=>{
-  if (!confirm('Clear all saved recipes? This cannot be undone.')) return;
+  const msg = state.lang === 'de'
+    ? 'Alle gespeicherten Rezepte löschen? Dies kann nicht rückgängig gemacht werden.'
+    : 'Clear all saved recipes? This cannot be undone.';
+  if (!confirm(msg)) return;
   state.favorites=[];
   state.recipeFolder={};
   localStorage.setItem('ff-favorites',JSON.stringify([]));
