@@ -572,6 +572,9 @@
           <span class="translate-spinner"></span>
           <span id="btn-translate-label">🌐 Translate</span>
         </button>
+        <button class="btn-translate" id="btn-modal-share" style="display:none" title="Share recipe">
+          ↗ Share
+        </button>
         <button class="btn-save-recipe" id="btn-save-modal" data-i18n="modal.save">Save to Favorites</button>
       </div>
     </div>
@@ -1080,12 +1083,17 @@ async function openModal(id) {
 
   // Show/hide edit button (only for local recipes)
   const modalEditBtn = document.getElementById('btn-modal-edit');
+  const modalShareBtn = document.getElementById('btn-modal-share');
   if (recipe.isLocal) {
     modalEditBtn.style.display = 'flex';
     modalEditBtn.onclick = () => { closeModal(); openEditModal(recipe.id); };
+    modalShareBtn.style.display = 'flex';
+    modalShareBtn.onclick = () => { closeModal(); openShareModal(recipe.id); };
   } else {
     modalEditBtn.style.display = 'none';
     modalEditBtn.onclick = null;
+    modalShareBtn.style.display = 'none';
+    modalShareBtn.onclick = null;
   }
 
   let metaHTML='';
