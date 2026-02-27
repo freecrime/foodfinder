@@ -327,6 +327,56 @@
   ::-webkit-scrollbar{width:5px}
   ::-webkit-scrollbar-track{background:transparent}
   ::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+
+  /* ── COOKING MODE ── */
+  .cooking-overlay{position:fixed;inset:0;z-index:500;background:#060606;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s ease}
+  .cooking-overlay.open{opacity:1;pointer-events:all}
+  .cooking-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+  .cooking-title{font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:-.3px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;margin-right:12px}
+  .cooking-progress-text{font-size:12px;color:var(--text-muted);flex-shrink:0;white-space:nowrap}
+  .btn-cooking-close{background:transparent;border:1px solid rgba(255,255,255,.1);color:var(--text-muted);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:var(--transition);flex-shrink:0;margin-left:10px}
+  .btn-cooking-close:hover{color:var(--text-primary);border-color:var(--border-glow)}
+  .cooking-progress-bar-wrap{height:2px;background:rgba(255,255,255,.07);flex-shrink:0}
+  .cooking-progress-bar{height:100%;background:rgba(255,255,255,.5);transition:width .4s ease}
+  .cooking-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;overflow:hidden}
+  .cooking-step-num{font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-bottom:20px}
+  .cooking-step-text{font-family:var(--font-display);font-size:clamp(20px,5vw,32px);font-weight:700;letter-spacing:-.5px;line-height:1.4;text-align:center;color:var(--text-primary);max-width:680px;transition:opacity .25s ease,transform .25s ease}
+  .cooking-step-text.transitioning{opacity:0;transform:translateY(12px)}
+  .cooking-timer-area{margin-top:28px;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .cooking-timer-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text-primary);font-family:var(--font-display);font-size:15px;font-weight:700;padding:12px 28px;border-radius:40px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:10px}
+  .cooking-timer-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3)}
+  .cooking-timer-btn.running{background:rgba(255,100,100,.12);border-color:rgba(255,100,100,.3);color:#ff9f9f}
+  .cooking-timer-display{font-family:var(--font-display);font-size:clamp(36px,10vw,64px);font-weight:800;letter-spacing:-2px;color:var(--text-primary);min-width:160px;text-align:center;transition:color .3s}
+  .cooking-timer-display.done{color:#7dff9a;animation:timerPulse .5s ease 3}
+  @keyframes timerPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+  .cooking-footer{padding:20px 20px 30px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.06)}
+  .btn-cook-nav{background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--text-secondary);font-family:var(--font-display);font-size:14px;font-weight:700;padding:14px 28px;border-radius:var(--radius);cursor:pointer;transition:var(--transition);flex:1;max-width:160px}
+  .btn-cook-nav:hover:not(:disabled){border-color:var(--border-glow);color:var(--text-primary);background:var(--surface-hover)}
+  .btn-cook-nav:disabled{opacity:.25;cursor:default}
+  .btn-cook-next{background:var(--text-primary);color:var(--bg);border:none;font-family:var(--font-display);font-size:15px;font-weight:800;padding:16px 36px;border-radius:var(--radius);cursor:pointer;transition:var(--transition);flex:2;max-width:260px;letter-spacing:-.3px}
+  .btn-cook-next:hover:not(:disabled){background:#e0e0e0;box-shadow:0 0 30px rgba(255,255,255,.12)}
+  .btn-cook-next:disabled{opacity:.3;cursor:default;background:rgba(255,255,255,.1);color:var(--text-secondary)}
+
+  .cooking-done-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
+  .cooking-done-emoji{font-size:60px;animation:doneEmoji .6s ease}
+  @keyframes doneEmoji{from{transform:scale(.5) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+  .cooking-done-title{font-family:var(--font-display);font-size:28px;font-weight:800;letter-spacing:-1px}
+  .cooking-done-sub{font-size:14px;color:var(--text-muted)}
+
+  /* ── SERVINGS ADJUSTER ── */
+  .servings-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;margin-bottom:18px;flex-wrap:wrap}
+  .servings-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);white-space:nowrap}
+  .servings-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:var(--font-display);font-size:14px;font-weight:700;padding:6px 12px;outline:none;cursor:pointer;transition:var(--transition)}
+  .servings-select:focus{border-color:var(--border-glow)}
+  .servings-select option{background:#1a1a1a}
+  .servings-unit{font-size:12px;color:var(--text-muted)}
+  .ingredient-item.scaled{border-color:rgba(255,255,255,.2)}
+
+
+
+  /* ── COOK MODE BUTTON ── */
+  .btn-cook-mode{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font-display);font-size:13px;font-weight:700;padding:10px 20px;border-radius:8px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:8px;white-space:nowrap}
+  .btn-cook-mode:hover{background:var(--surface-hover);border-color:var(--border-glow);color:var(--text-primary)}
 </style>
 </head>
 <body>
@@ -349,44 +399,10 @@
 <div id="changelog-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px 16px">
   <div style="background:#111;border:1px solid rgba(255,255,255,.12);border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.6)">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.08)">
-      <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.4px">Changelog</span>
+      <span id="changelog-heading" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.4px">Changelog</span>
       <button id="btn-close-changelog" style="background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#888;font-size:14px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s ease">✕</button>
     </div>
-    <div style="padding:20px 22px;max-height:420px;overflow-y:auto">
-      <div style="margin-bottom:20px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800">v1.2</span>
-          <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#555;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:2px 8px">Latest</span>
-        </div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Share recipes via copy-paste code — works across any device</li>
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Import recipes from share codes in the upload panel</li>
-        </ul>
-      </div>
-      <div style="margin-bottom:20px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800">v1.1</span>
-        </div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Added folder system for organizing saved recipes</li>
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Added confirmation dialog when deleting recipes</li>
-        </ul>
-      </div>
-      <div style="margin-bottom:20px">
-        <div style="margin-bottom:10px">
-          <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800">v1.0</span>
-        </div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Initial release</li>
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Ingredient-based recipe search via MealDB API</li>
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Local recipe import from PDF with AI parsing</li>
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Save recipes to favorites</li>
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Rate recipes with a score</li>
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> German / English interface &amp; translation</li>
-          <li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> Filter by diet, difficulty, and cook time</li>
-        </ul>
-      </div>
-    </div>
+    <div id="changelog-body" style="padding:20px 22px;max-height:420px;overflow-y:auto"></div>
   </div>
 </div>
 
@@ -419,6 +435,7 @@
       <p class="progress-label" id="progress-label">Processing...</p>
       <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
     </div>
+    <div id="storage-indicator" style="margin-top:10px;font-size:11px;color:var(--text-muted);display:none"></div>
     <div class="local-recipes-list" id="local-recipes-list"></div>
 
     <!-- IMPORT FROM CODE -->
@@ -576,6 +593,7 @@
         <button class="btn-translate" id="btn-modal-share" style="display:none" title="Share recipe">
           ↗ Share
         </button>
+        <button class="btn-cook-mode" id="btn-modal-cook" style="display:none">🍳 Cook</button>
         <button class="btn-save-recipe" id="btn-save-modal" data-i18n="modal.save">Save to Favorites</button>
       </div>
     </div>
@@ -592,6 +610,25 @@
 </div>
 
 <footer class="footer"><span data-i18n="footer.text">FoodFinder &mdash; Discover recipes from what you have</span></footer>
+
+<!-- COOKING MODE OVERLAY -->
+<div class="cooking-overlay" id="cooking-overlay" role="dialog" aria-modal="true" aria-label="Cooking mode">
+  <div class="cooking-header">
+    <span class="cooking-title" id="cooking-recipe-title"></span>
+    <span class="cooking-progress-text" id="cooking-progress-text"></span>
+    <button class="btn-cooking-close" id="btn-cooking-close" title="Exit cooking mode">✕</button>
+  </div>
+  <div class="cooking-progress-bar-wrap"><div class="cooking-progress-bar" id="cooking-progress-bar" style="width:0%"></div></div>
+  <div class="cooking-body" id="cooking-body">
+    <div class="cooking-step-num" id="cooking-step-num"></div>
+    <div class="cooking-step-text" id="cooking-step-text"></div>
+    <div class="cooking-timer-area" id="cooking-timer-area"></div>
+  </div>
+  <div class="cooking-footer">
+    <button class="btn-cook-nav" id="btn-cook-prev">← Prev</button>
+    <button class="btn-cook-next" id="btn-cook-next">Next Step →</button>
+  </div>
+</div>
 
 <script>
 // Set PDF.js worker
@@ -772,6 +809,8 @@ function applyI18n() {
   document.getElementById('btn-changelog').setAttribute('data-tip', state.lang === 'de' ? 'Änderungsprotokoll' : 'Changelog');
   document.getElementById('btn-changelog').setAttribute('title', state.lang === 'de' ? 'Änderungsprotokoll' : 'Changelog');
   updateTimeDisplay();
+  // Re-render changelog if it's open
+  if (document.getElementById('changelog-overlay').style.display === 'flex') renderChangelog();
 }
 
 // ============================================================
@@ -1085,6 +1124,7 @@ async function openModal(id) {
   // Show/hide edit button (only for local recipes)
   const modalEditBtn = document.getElementById('btn-modal-edit');
   const modalShareBtn = document.getElementById('btn-modal-share');
+  const modalCookBtn = document.getElementById('btn-modal-cook');
   if (recipe.isLocal) {
     modalEditBtn.style.display = 'flex';
     modalEditBtn.onclick = () => { closeModal(); openEditModal(recipe.id); };
@@ -1096,6 +1136,10 @@ async function openModal(id) {
     modalShareBtn.style.display = 'none';
     modalShareBtn.onclick = null;
   }
+  // Cook mode button — show for any recipe that has instructions
+  const hasSteps = (recipe.instructions || '').trim().length > 10;
+  modalCookBtn.style.display = hasSteps ? 'flex' : 'none';
+  modalCookBtn.onclick = () => { openCookingMode(recipe); };
 
   let metaHTML='';
   if(recipe.time) metaHTML+=`<div class="modal-meta-item"><span>${t('meta.time')}</span><strong>${recipe.time} min</strong></div>`;
@@ -1112,7 +1156,7 @@ async function openModal(id) {
   renderModalContent(recipe.ingredients||[], recipe.instructions||'', false);
 }
 
-function renderModalContent(ingredients, instructions, translated) {
+function renderModalContent(ingredients, instructions, translated, servingsMultiplier=1) {
   let bodyHTML='';
   const recipe = state.currentRecipe;
 
@@ -1120,9 +1164,24 @@ function renderModalContent(ingredients, instructions, translated) {
     bodyHTML += `<div class="ai-parsed-note">✨ AI-parsed from PDF — ingredients and instructions automatically identified</div>`;
   }
 
+  // Servings adjuster for local recipes
+  if (recipe && recipe.isLocal && (recipe.servings || ingredients.length > 0)) {
+    const baseServings = recipe.servings || 2;
+    const currentServings = Math.round(baseServings * servingsMultiplier);
+    const options = [1,2,3,4,5,6,8,10,12,16,20].map(n =>
+      `<option value="${n}" ${n===currentServings?'selected':''}>${n}</option>`
+    ).join('');
+    bodyHTML += `<div class="servings-bar">
+      <span class="servings-label">Servings</span>
+      <select class="servings-select" id="servings-select">${options}</select>
+      <span class="servings-unit">${currentServings === 1 ? 'serving' : 'servings'}${baseServings !== currentServings ? ` (base: ${baseServings})` : ''}</span>
+    </div>`;
+  }
+
   if(ingredients&&ingredients.length) {
+    const mult = servingsMultiplier;
     bodyHTML+=`<p class="modal-section-title">${t('modal.ingredients')}</p>
-    <div class="ingredients-list">${ingredients.map(i=>`<div class="ingredient-item">${i.text}</div>`).join('')}</div>`;
+    <div class="ingredients-list">${ingredients.map(i=>`<div class="ingredient-item${mult!==1?' scaled':''}">${mult!==1 ? scaleIngredient(i.text, mult) : i.text}</div>`).join('')}</div>`;
   }
   if(instructions) {
     const rawSteps = instructions.split(/\r?\n+/).map(s=>s.replace(/^\d+[\.\)]\s*/,'').trim()).filter(s=>s.length>8);
@@ -1135,6 +1194,17 @@ function renderModalContent(ingredients, instructions, translated) {
     bodyHTML += `<p style="font-size:11px;color:var(--text-muted);margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">🌐 Automatically translated</p>`;
   }
   document.getElementById('modal-body').innerHTML=bodyHTML;
+
+  // Bind servings dropdown
+  const select = document.getElementById('servings-select');
+  if (select && recipe) {
+    const baseServings = recipe.servings || 2;
+    select.addEventListener('change', () => {
+      const newServings = parseInt(select.value);
+      const mult = newServings / baseServings;
+      renderModalContent(recipe.ingredients||[], recipe.instructions||'', translated, mult);
+    });
+  }
 }
 
 async function handleTranslateClick() {
@@ -1834,61 +1904,62 @@ function parseRecipeFromLines(lines, filename) {
   };
 }
 async function extractPdfImage(arrayBuffer) {
-  // Render first page of PDF to canvas and return as data URL
-  // For Chefkoch-style: the food image is in the top-right quadrant
+  // Render first page of PDF to canvas and return a tiny thumbnail
+  // Target: ~400px wide, JPEG q=0.45 → typically 15–40 KB
   try {
     if (typeof pdfjsLib === 'undefined') return null;
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
     const page = await pdf.getPage(1);
-    const scale = 1.5;
-    const vp = page.getViewport({ scale });
-    const canvas = document.createElement('canvas');
-    canvas.width = vp.width;
-    canvas.height = vp.height;
-    const ctx = canvas.getContext('2d');
-    await page.render({ canvasContext: ctx, viewport: vp }).promise;
 
-    // Try to detect if there's an image in the right half (Chefkoch layout)
-    // Crop the right ~48% and top ~40% for the food photo
-    const cropX = Math.floor(vp.width * 0.48);
-    const cropY = 0;
-    const cropW = vp.width - cropX;
-    const cropH = Math.floor(vp.height * 0.40);
+    // Render at scale=1 first to detect layout cheaply
+    const vp1 = page.getViewport({ scale: 1 });
+    const detectCanvas = document.createElement('canvas');
+    detectCanvas.width = vp1.width;
+    detectCanvas.height = vp1.height;
+    const detectCtx = detectCanvas.getContext('2d');
+    await page.render({ canvasContext: detectCtx, viewport: vp1 }).promise;
 
-    // Check if that region has non-white pixels (actual image content)
-    const imgData = ctx.getImageData(cropX, cropY, cropW, cropH);
+    // Detect image region (Chefkoch: right half top 40%, fallback: full top 35%)
+    let srcX = 0, srcY = 0, srcW = vp1.width, srcH = Math.floor(vp1.height * 0.35);
+    const cropX = Math.floor(vp1.width * 0.48);
+    const cropW = vp1.width - cropX;
+    const cropH = Math.floor(vp1.height * 0.40);
+    const imgData = detectCtx.getImageData(cropX, 0, cropW, cropH);
     let nonWhite = 0;
-    for (let i = 0; i < imgData.data.length; i+=4) {
-      const r=imgData.data[i], g=imgData.data[i+1], b=imgData.data[i+2];
-      if (r < 240 || g < 240 || b < 240) nonWhite++;
+    for (let i = 0; i < imgData.data.length; i += 4) {
+      if (imgData.data[i] < 240 || imgData.data[i+1] < 240 || imgData.data[i+2] < 240) nonWhite++;
     }
-    const coverage = nonWhite / (cropW * cropH);
-
-    if (coverage > 0.1) {
-      // There's an image there — crop it out
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = cropW;
-      cropCanvas.height = cropH;
-      cropCanvas.getContext('2d').putImageData(imgData, 0, 0);
-      return cropCanvas.toDataURL('image/jpeg', 0.82);
-    }
-
-    // Fallback: try full top strip
-    const topData = ctx.getImageData(0, 0, vp.width, Math.floor(vp.height * 0.35));
-    let topNonWhite = 0;
-    for (let i = 0; i < topData.data.length; i+=4) {
-      const r=topData.data[i], g=topData.data[i+1], b=topData.data[i+2];
-      if (r < 235 || g < 235 || b < 235) topNonWhite++;
-    }
-    if (topNonWhite / (vp.width * Math.floor(vp.height * 0.35)) > 0.08) {
-      const fallbackCanvas = document.createElement('canvas');
-      fallbackCanvas.width = vp.width;
-      fallbackCanvas.height = Math.floor(vp.height * 0.35);
-      fallbackCanvas.getContext('2d').putImageData(topData, 0, 0);
-      return fallbackCanvas.toDataURL('image/jpeg', 0.75);
+    if (nonWhite / (cropW * cropH) > 0.1) {
+      srcX = cropX; srcY = 0; srcW = cropW; srcH = cropH;
+    } else {
+      // Check if top strip has any content at all
+      const topData = detectCtx.getImageData(0, 0, vp1.width, srcH);
+      let topNonWhite = 0;
+      for (let i = 0; i < topData.data.length; i += 4) {
+        if (topData.data[i] < 235 || topData.data[i+1] < 235 || topData.data[i+2] < 235) topNonWhite++;
+      }
+      if (topNonWhite / (vp1.width * srcH) < 0.08) return null; // mostly white, skip
     }
 
-    return null;
+    // Render the cropped region at a fixed small output size (max 360px wide)
+    const MAX_W = 360;
+    const aspect = srcH / srcW;
+    const outW = Math.min(MAX_W, srcW);
+    const outH = Math.round(outW * aspect);
+    const scale = outW / srcW;
+
+    // Re-render at the right scale centered on the region
+    const vp2 = page.getViewport({ scale });
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = outW;
+    outCanvas.height = outH;
+    const outCtx = outCanvas.getContext('2d');
+    // Translate so only our region is in view
+    outCtx.translate(-srcX * scale, -srcY * scale);
+    await page.render({ canvasContext: outCtx, viewport: vp2, transform: [1,0,0,1,0,0] }).promise;
+
+    // Export as heavily compressed JPEG
+    return outCanvas.toDataURL('image/jpeg', 0.42);
   } catch(e) {
     console.warn('PDF image extraction failed:', e);
     return null;
@@ -2046,17 +2117,68 @@ ${text}`;
 // ============================================================
 //  LOCAL RECIPE HELPERS (accidentally removed — restored)
 // ============================================================
+// ============================================================
+//  IMAGE COMPRESSION HELPER
+//  Resizes to max 360px wide and compresses to JPEG q=0.45
+//  This keeps thumbnails to ~15–40 KB each.
+// ============================================================
+function compressImageDataUrl(dataUrl, maxW=360, quality=0.45) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const aspect = img.height / img.width;
+      const w = Math.min(maxW, img.width);
+      const h = Math.round(w * aspect);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataUrl); // fallback: keep original
+    img.src = dataUrl;
+  });
+}
+
 function saveLocalRecipes() {
-  // pdfImageDataUrl can be large — store without it to avoid localStorage quota issues
+  // Store recipes including compressed pdfImageDataUrl
+  // Images are already small (360px, q=0.45) so this is safe
   const toStore = state.localRecipes.map(r => {
-    const { pdfImageDataUrl, ...rest } = r;
+    // Only persist the compressed thumbnail; never store large base64 blobs
+    const { _rawBuffer, ...rest } = r;
     return rest;
   });
   try {
     localStorage.setItem('ff-local-recipes', JSON.stringify(toStore));
   } catch(e) {
-    console.warn('localStorage quota exceeded, trying without images:', e);
-    localStorage.setItem('ff-local-recipes', JSON.stringify(toStore));
+    // If quota exceeded, retry without images
+    console.warn('localStorage quota exceeded, saving without images:', e);
+    const noImages = toStore.map(r => { const { pdfImageDataUrl, ...rest } = r; return rest; });
+    try { localStorage.setItem('ff-local-recipes', JSON.stringify(noImages)); } catch(e2) {}
+  }
+}
+
+function updateStorageIndicator() {
+  const el = document.getElementById('storage-indicator');
+  if (!el) return;
+  try {
+    // Estimate used localStorage bytes
+    let totalBytes = 0;
+    for (const key of Object.keys(localStorage)) {
+      totalBytes += (localStorage.getItem(key) || '').length * 2; // UTF-16
+    }
+    const usedKB = (totalBytes / 1024).toFixed(0);
+    const usedMB = (totalBytes / 1024 / 1024).toFixed(2);
+    const limitMB = 5;
+    const pct = Math.min(100, Math.round((totalBytes / 1024 / 1024 / limitMB) * 100));
+    const count = state.localRecipes.length;
+    const approxPerRecipe = count > 0 ? totalBytes / count : 0;
+    const approxRemaining = approxPerRecipe > 0 ? Math.floor(((limitMB * 1024 * 1024) - totalBytes) / approxPerRecipe) : '?';
+    const color = pct > 80 ? '#ff9f9f' : pct > 60 ? '#ffd07d' : 'var(--text-muted)';
+    el.style.display = 'block';
+    el.style.color = color;
+    el.innerHTML = `Storage: ~${usedMB} MB / ${limitMB} MB used (${pct}%) &mdash; ~${approxRemaining} more recipes fit`;
+  } catch(e) {
+    el.style.display = 'none';
   }
 }
 
@@ -2100,6 +2222,7 @@ function renderLocalRecipesList() {
     container.querySelectorAll('.share-local').forEach(btn => btn.addEventListener('click', () => openShareModal(btn.dataset.id)));
     container.querySelectorAll('.delete-local').forEach(btn => btn.addEventListener('click', () => deleteLocalRecipe(btn.dataset.id)));
   });
+  updateStorageIndicator();
 }
 
 // ============================================================
@@ -2221,7 +2344,7 @@ function openEditModal(id) {
           : `<div class="edit-img-placeholder"><span>🖼</span><p>Click to add a photo</p></div>`
         }
       </div>
-      <p style="font-size:11px;color:var(--text-muted);margin-top:6px">💡 Recommended: under 500 KB · ~800×600 px. Large images may exceed browser storage limits (localStorage ~5 MB total) and fail to save.</p>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:6px">Images are automatically resized and compressed to keep storage usage low.</p>
     </div>
     <div>
       <label class="edit-field-label">Recipe Name</label>
@@ -2275,11 +2398,11 @@ function bindEditListeners() {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => {
-      const dataUrl = ev.target.result;
+    reader.onload = async ev => {
+      const compressed = await compressImageDataUrl(ev.target.result);
       imgWrap.innerHTML = `
         <input type="file" class="edit-img-input" id="edit-img-input" accept="image/*">
-        <img class="edit-img-preview" id="edit-img-preview" src="${dataUrl}" alt="Recipe photo">
+        <img class="edit-img-preview" id="edit-img-preview" src="${compressed}" alt="Recipe photo">
         <button type="button" class="edit-img-remove" id="edit-img-remove">✕ Remove</button>`;
       bindImgListeners();
     };
@@ -2327,11 +2450,12 @@ function bindImgListeners() {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = ev => {
-        const dataUrl = ev.target.result;
+      reader.onload = async ev => {
+        // Compress before displaying/storing
+        const compressed = await compressImageDataUrl(ev.target.result);
         imgWrap.innerHTML = `
           <input type="file" class="edit-img-input" id="edit-img-input" accept="image/*">
-          <img class="edit-img-preview" id="edit-img-preview" src="${dataUrl}" alt="Recipe photo">
+          <img class="edit-img-preview" id="edit-img-preview" src="${compressed}" alt="Recipe photo">
           <button type="button" class="edit-img-remove" id="edit-img-remove">✕ Remove</button>`;
         bindImgListeners();
       };
@@ -2549,8 +2673,104 @@ document.getElementById('btn-import-code').addEventListener('click', () => {
   setTimeout(() => { status.style.display = 'none'; }, 4000);
 });
 
+// ============================================================
+//  CHANGELOG DATA
+// ============================================================
+const CHANGELOG = [
+  {
+    version: 'v1.4',
+    latest: true,
+    en: [
+      'Images from PDFs are now compressed and saved in local storage',
+      'Manually added photos are resized automatically before saving',
+      'Improved storage efficiency — more recipes fit in the same space',
+    ],
+    de: [
+      'Bilder aus PDFs werden nun komprimiert und lokal gespeichert',
+      'Manuell hinzugef\u00fcgte Fotos werden vor dem Speichern automatisch verkleinert',
+      'Bessere Speichereffizienz \u2014 mehr Rezepte passen in denselben Speicherplatz',
+    ],
+  },
+  {
+    version: 'v1.3',
+    en: [
+      'Added cooking mode \u2014 fullscreen step-by-step view with large text and navigation',
+      'Timer detection \u2014 automatically creates a start/pause timer for timed steps',
+      'Servings adjuster \u2014 scale ingredient amounts for local recipes',
+      'Storage indicator \u2014 shows how much browser storage is in use',
+    ],
+    de: [
+      'Kochmodus hinzugef\u00fcgt \u2014 Vollbild-Schritt-f\u00fcr-Schritt-Ansicht mit gro\u00dfem Text und Navigation',
+      'Timer-Erkennung \u2014 erstellt automatisch einen Start-/Pause-Timer f\u00fcr zeitgesteuerte Schritte',
+      'Portionsanpasser \u2014 Zutatenmengen f\u00fcr lokale Rezepte skalieren',
+      'Speicheranzeige \u2014 zeigt an, wie viel Browser-Speicher belegt ist',
+    ],
+  },
+  {
+    version: 'v1.2',
+    en: [
+      'Share recipes via copy-paste code \u2014 works across any device',
+      'Import recipes from share codes in the upload panel',
+    ],
+    de: [
+      'Rezepte per Kopier-Code teilen \u2014 funktioniert auf jedem Ger\u00e4t',
+      'Rezepte aus Freigabe-Codes im Upload-Bereich importieren',
+    ],
+  },
+  {
+    version: 'v1.1',
+    en: [
+      'Added folder system for organizing saved recipes',
+      'Added confirmation dialog when deleting recipes',
+    ],
+    de: [
+      'Ordnersystem zum Organisieren gespeicherter Rezepte hinzugef\u00fcgt',
+      'Best\u00e4tigungsdialog beim L\u00f6schen von Rezepten hinzugef\u00fcgt',
+    ],
+  },
+  {
+    version: 'v1.0',
+    en: [
+      'Initial release',
+      'Ingredient-based recipe search via MealDB API',
+      'Local recipe import from PDF with AI parsing',
+      'Save recipes to favorites',
+      'Rate recipes with a score',
+      'German / English interface and translation',
+      'Filter by diet, difficulty, and cook time',
+    ],
+    de: [
+      'Erstver\u00f6ffentlichung',
+      'Zutatenbasierte Rezeptsuche \u00fcber die MealDB-API',
+      'Lokaler Rezeptimport aus PDF mit KI-Analyse',
+      'Rezepte in Favoriten speichern',
+      'Rezepte mit einer Punktzahl bewerten',
+      'Deutsche / englische Oberfl\u00e4che und \u00dcbersetzung',
+      'Filtern nach Di\u00e4t, Schwierigkeit und Kochzeit',
+    ],
+  },
+];
+
+function renderChangelog() {
+  const lang = state.lang;
+  const latestLabel = lang === 'de' ? 'Aktuell' : 'Latest';
+  document.getElementById('changelog-heading').textContent = lang === 'de' ? '\u00c4nderungsprotokoll' : 'Changelog';
+  const li = (text) => `<li style="font-size:13px;color:#999;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#555">+</span> ${text}</li>`;
+  document.getElementById('changelog-body').innerHTML = CHANGELOG.map(entry => `
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800">${entry.version}</span>
+        ${entry.latest ? `<span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#555;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:2px 8px">${latestLabel}</span>` : ''}
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
+        ${(entry[lang] || entry.en).map(li).join('')}
+      </ul>
+    </div>`).join('');
+}
+
 // Changelog
 document.getElementById('btn-changelog').addEventListener('click', () => {
+  renderChangelog();
   document.getElementById('changelog-overlay').style.display = 'flex';
 });
 document.getElementById('btn-close-changelog').addEventListener('click', () => {
@@ -2672,6 +2892,240 @@ dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over')
 dropZone.addEventListener('drop',e=>{
   e.preventDefault(); dropZone.classList.remove('drag-over');
   if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+
+// ============================================================
+//  INGREDIENT SCALING HELPER
+// ============================================================
+function scaleIngredient(text, multiplier) {
+  if (multiplier === 1) return text;
+  // Match patterns like: 200g, 2.5 cups, 1/2 tsp, 3 eggs
+  return text.replace(/(\d+[\d\/\.,]*)/g, (match) => {
+    let val;
+    if (match.includes('/')) {
+      const [n, d] = match.split('/');
+      val = parseFloat(n) / parseFloat(d);
+    } else {
+      val = parseFloat(match.replace(',', '.'));
+    }
+    if (isNaN(val)) return match;
+    const scaled = val * multiplier;
+    // Round nicely
+    if (scaled === Math.floor(scaled)) return String(Math.floor(scaled));
+    // Round to 1 decimal if close enough
+    const r = Math.round(scaled * 10) / 10;
+    return r % 1 === 0 ? String(r) : String(r);
+  });
+}
+
+// ============================================================
+//  COOKING MODE
+// ============================================================
+let cookingState = {
+  steps: [],
+  currentStep: 0,
+  timers: {}, // stepIdx → {seconds, remaining, intervalId, running}
+  wakeLock: null,
+};
+
+function getInstructionSteps(recipe) {
+  const instructions = recipe.instructions || '';
+  const rawSteps = instructions.split(/\r?\n+/).map(s=>s.replace(/^\d+[\.\)]\s*/,'').trim()).filter(s=>s.length>8);
+  return rawSteps.length ? rawSteps : instructions.split(/\.\s+/).filter(s=>s.length>8).map(s=>s+'.');
+}
+
+function detectTimerInStep(stepText) {
+  // Detect patterns like "bake for 20 minutes", "simmer 15 min", "cook for 1 hour 30 minutes"
+  const patterns = [
+    /(\d+)\s*(?:to|-)\s*(\d+)\s*(minutes?|mins?|hours?|hrs?|seconds?|secs?)/i,
+    /(\d+)\s*(minutes?|mins?|hours?|hrs?|seconds?|secs?)/i,
+    /(\d+)\s*h(?:ours?)?\s*(\d+)\s*(?:minutes?|mins?)/i,
+  ];
+  for (const pat of patterns) {
+    const m = stepText.match(pat);
+    if (m) {
+      let seconds = 0;
+      const unit = (m[2]||m[3]||'').toLowerCase();
+      const val = parseInt(m[1]);
+      if (/hour|hr/.test(unit)) seconds += val * 3600;
+      else if (/min/.test(unit)) seconds += val * 60;
+      else if (/sec/.test(unit)) seconds += val;
+      // handle "X hours Y minutes" pattern
+      if (m[3] && /min/.test(m[3].toLowerCase()) && /hour|hr/.test(unit)) {
+        seconds += parseInt(m[2]) * 60;
+      }
+      if (seconds > 0) return seconds;
+    }
+  }
+  return null;
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function openCookingMode(recipe) {
+  cookingState.steps = getInstructionSteps(recipe);
+  cookingState.currentStep = 0;
+  cookingState.timers = {};
+  
+  const overlay = document.getElementById('cooking-overlay');
+  document.getElementById('cooking-recipe-title').textContent = recipe.title;
+  
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  
+  // Request wake lock to keep screen on
+  if ('wakeLock' in navigator) {
+    navigator.wakeLock.request('screen').then(lock => {
+      cookingState.wakeLock = lock;
+    }).catch(() => {});
+  }
+  
+  renderCookingStep();
+}
+
+function closeCookingMode() {
+  const overlay = document.getElementById('cooking-overlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  
+  // Release wake lock
+  if (cookingState.wakeLock) { cookingState.wakeLock.release(); cookingState.wakeLock = null; }
+  
+  // Clear all timers
+  Object.values(cookingState.timers).forEach(t => { if (t.intervalId) clearInterval(t.intervalId); });
+  cookingState.timers = {};
+}
+
+function renderCookingStep() {
+  const { steps, currentStep } = cookingState;
+  const total = steps.length;
+  const isLast = currentStep >= total - 1;
+  
+  if (currentStep >= total) {
+    // Done screen
+    document.getElementById('cooking-body').innerHTML = `
+      <div class="cooking-done-screen">
+        <div class="cooking-done-emoji">🎉</div>
+        <div class="cooking-done-title">Recipe complete!</div>
+        <div class="cooking-done-sub">Enjoy your meal.</div>
+      </div>`;
+    document.getElementById('cooking-step-num').textContent = '';
+    document.getElementById('cooking-timer-area').innerHTML = '';
+    document.getElementById('btn-cook-next').disabled = true;
+    document.getElementById('btn-cook-prev').disabled = false;
+    document.getElementById('cooking-progress-bar').style.width = '100%';
+    document.getElementById('cooking-progress-text').textContent = `Done!`;
+    return;
+  }
+
+  const step = steps[currentStep];
+  
+  document.getElementById('cooking-progress-text').textContent = `${currentStep+1} / ${total}`;
+  document.getElementById('cooking-progress-bar').style.width = `${((currentStep+1)/total)*100}%`;
+  
+  const stepNumEl = document.getElementById('cooking-step-num');
+  const stepTextEl = document.getElementById('cooking-step-text');
+  stepNumEl.textContent = `Step ${currentStep+1}`;
+  
+  // Animate transition
+  stepTextEl.classList.add('transitioning');
+  setTimeout(() => {
+    stepTextEl.textContent = step;
+    stepTextEl.classList.remove('transitioning');
+  }, 250);
+  
+  document.getElementById('btn-cook-prev').disabled = currentStep === 0;
+  document.getElementById('btn-cook-next').textContent = isLast ? '🎉 Finish' : 'Next Step →';
+  document.getElementById('btn-cook-next').disabled = false;
+  
+  // Timer detection
+  const timerArea = document.getElementById('cooking-timer-area');
+  const detectedSeconds = detectTimerInStep(step);
+  
+  if (detectedSeconds) {
+    if (!cookingState.timers[currentStep]) {
+      cookingState.timers[currentStep] = { total: detectedSeconds, remaining: detectedSeconds, intervalId: null, running: false };
+    }
+    renderCookingTimer(currentStep, timerArea);
+  } else {
+    timerArea.innerHTML = '';
+  }
+}
+
+function renderCookingTimer(stepIdx, container) {
+  const timer = cookingState.timers[stepIdx];
+  if (!timer) return;
+  
+  const isDone = timer.remaining <= 0;
+  container.innerHTML = `
+    <div class="cooking-timer-display${isDone?' done':''}" id="cook-timer-display">${isDone ? '✓ Done!' : formatTime(timer.remaining)}</div>
+    <button class="cooking-timer-btn${timer.running?' running':''}" id="cook-timer-btn">
+      ${isDone ? '🔄 Reset' : timer.running ? '⏸ Pause' : (timer.remaining < timer.total ? '▶ Resume' : '▶ Start Timer')}
+    </button>`;
+  
+  document.getElementById('cook-timer-btn').addEventListener('click', () => {
+    if (isDone) {
+      timer.remaining = timer.total;
+      timer.running = false;
+      if (timer.intervalId) clearInterval(timer.intervalId);
+      timer.intervalId = null;
+      renderCookingTimer(stepIdx, container);
+      return;
+    }
+    if (timer.running) {
+      clearInterval(timer.intervalId);
+      timer.intervalId = null;
+      timer.running = false;
+    } else {
+      timer.running = true;
+      timer.intervalId = setInterval(() => {
+        timer.remaining--;
+        if (timer.remaining <= 0) {
+          timer.remaining = 0;
+          timer.running = false;
+          clearInterval(timer.intervalId);
+          timer.intervalId = null;
+          // Beep
+          try { const ctx = new AudioContext(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value = 880; gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+1); osc.start(); osc.stop(ctx.currentTime+1); } catch(e){}
+        }
+        renderCookingTimer(stepIdx, container);
+      }, 1000);
+    }
+    renderCookingTimer(stepIdx, container);
+  });
+}
+
+
+// Cooking mode event listeners
+document.getElementById('btn-cooking-close').addEventListener('click', closeCookingMode);
+document.getElementById('btn-cook-next').addEventListener('click', () => {
+  const { steps, currentStep } = cookingState;
+  // If on last step, clicking Finish closes cooking mode
+  if (currentStep >= steps.length - 1) {
+    closeCookingMode();
+    return;
+  }
+  cookingState.currentStep++;
+  renderCookingStep();
+});
+document.getElementById('btn-cook-prev').addEventListener('click', () => {
+  if (cookingState.currentStep > 0) { cookingState.currentStep--; renderCookingStep(); }
+});
+document.addEventListener('keydown', e => {
+  const overlay = document.getElementById('cooking-overlay');
+  if (!overlay.classList.contains('open')) return;
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    const { steps, currentStep } = cookingState;
+    if (currentStep >= steps.length - 1) { closeCookingMode(); return; }
+    cookingState.currentStep++;
+    renderCookingStep();
+  }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); if (cookingState.currentStep > 0) { cookingState.currentStep--; renderCookingStep(); } }
 });
 
 // ============================================================
