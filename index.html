@@ -32,14 +32,14 @@
   }
 
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth;height:100%}
-  body{background:var(--bg);color:var(--text-primary);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden;display:flex;flex-direction:column}
+  html{scroll-behavior:smooth;height:100%;width:100%;overflow-x:hidden}
+  body{background:var(--bg);color:var(--text-primary);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden;width:100%;display:flex;flex-direction:column;position:relative}
 
   #particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
 
   /* ── NAVBAR ── */
-  .navbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:rgba(9,9,9,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
-  .nav-logo{font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:-.5px}
+  .navbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:rgba(9,9,9,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);width:100%;max-width:100vw}
+  .nav-logo{font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:-.5px;min-width:0;flex-shrink:1}
   .nav-logo span{color:var(--text-muted);font-weight:400}
   .nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 
@@ -51,7 +51,7 @@
   .btn-lang:hover{background:var(--surface-hover);border-color:var(--border-glow);box-shadow:var(--glow)}
 
   /* ── MAIN ── */
-  .main-container{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px 80px;flex:1}
+  .main-container{position:relative;z-index:1;max-width:1100px;width:100%;margin:0 auto;padding:0 20px 80px;flex:1;min-width:0}
   .footer{position:relative;z-index:1;text-align:center;padding:30px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);letter-spacing:.5px;margin-top:auto}
 
   /* ── HERO ── */
@@ -424,6 +424,7 @@
   <section class="upload-panel" id="upload-panel">
     <div class="section-header" style="margin-bottom:18px">
       <h2 class="section-title" data-i18n="upload.title">Add Local Recipe</h2>
+      <button class="btn-secondary" id="btn-backup-download" title="Download all saved recipes as a backup file" style="display:none">&#8595; Backup</button>
     </div>
     <div class="upload-drop-zone" id="drop-zone">
       <input type="file" id="pdf-file-input" accept=".pdf" multiple>
@@ -2223,6 +2224,50 @@ function renderLocalRecipesList() {
     container.querySelectorAll('.delete-local').forEach(btn => btn.addEventListener('click', () => deleteLocalRecipe(btn.dataset.id)));
   });
   updateStorageIndicator();
+  updateBackupBtn();
+}
+
+// ============================================================
+//  BACKUP DOWNLOAD
+// ============================================================
+function downloadBackup() {
+  if (!state.localRecipes.length) return;
+
+  const exportData = {
+    _ff_backup: '1',
+    exportedAt: new Date().toISOString(),
+    recipes: state.localRecipes.map(r => ({
+      title: r.title,
+      ingredients: (r.ingredients || []).map(i => i.text || i),
+      instructions: r.instructions || '',
+      category: r.category || '',
+      area: r.area || '',
+      time: r.time || null,
+      servings: r.servings || null,
+      calories: r.calories || null,
+      difficulty: r.difficulty || '',
+      tags: r.tags || [],
+      source: r.source || 'local',
+      addedAt: r.addedAt || null,
+    })),
+  };
+
+  const json = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const date = new Date().toISOString().slice(0, 10);
+  a.download = `foodfinder-backup-${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function updateBackupBtn() {
+  const btn = document.getElementById('btn-backup-download');
+  if (btn) btn.style.display = state.localRecipes.length ? 'block' : 'none';
 }
 
 // ============================================================
@@ -2671,6 +2716,14 @@ document.getElementById('btn-import-code').addEventListener('click', () => {
   status.textContent = result.ok ? '✓ ' + result.msg : '✕ ' + result.msg;
   if (result.ok) document.getElementById('import-code-input').value = '';
   setTimeout(() => { status.style.display = 'none'; }, 4000);
+});
+
+document.getElementById('btn-backup-download').addEventListener('click', () => {
+  downloadBackup();
+  const btn = document.getElementById('btn-backup-download');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '&#10003; Downloaded';
+  setTimeout(() => { btn.innerHTML = orig; }, 2000);
 });
 
 // ============================================================
